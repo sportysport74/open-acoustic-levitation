@@ -1,0 +1,4 @@
+﻿# Python dependencies for Open Acoustic Levitation simulations
+numpy>=1.20.0
+matplotlib>=3.3.0
+scipy>=1.7.0
