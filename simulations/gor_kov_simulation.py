@@ -1,7 +1,4 @@
-﻿[PASTE CONTENT FROM: gor_kov_simulation.py]
-
-Replace this entire content with the downloaded file.
-"""
+﻿"""
 Open Acoustic Levitation Project - Gor'kov Potential Simulation
 ================================================================
 
@@ -326,7 +323,7 @@ for bar, depth in zip(bars, depths):
             ha='center', va='bottom', fontweight='bold')
 
 plt.tight_layout()
-plt.savefig('/mnt/user-data/outputs/gor_kov_comparison.png', dpi=300, bbox_inches='tight')
+plt.savefig('gor_kov_comparison.png', dpi=300, bbox_inches='tight')
 print("✓ Saved: gor_kov_comparison.png")
 
 # ============================================================================
@@ -383,7 +380,7 @@ ax2.grid(alpha=0.3)
 ax2.legend()
 
 plt.tight_layout()
-plt.savefig('/mnt/user-data/outputs/line_profiles.png', dpi=300, bbox_inches='tight')
+plt.savefig('line_profiles.png', dpi=300, bbox_inches='tight')
 print("✓ Saved: line_profiles.png")
 
 print("\nSimulation complete!")
