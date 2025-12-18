@@ -326,6 +326,165 @@ plt.tight_layout()
 plt.savefig('gor_kov_comparison.png', dpi=300, bbox_inches='tight')
 print("✓ Saved: gor_kov_comparison.png")
 
+
+# ============================================================================
+# ADDITIONAL 2D HEATMAP VISUALIZATION
+# ============================================================================
+
+print("Generating 2D heatmap visualizations...")
+
+fig3 = plt.figure(figsize=(18, 6))
+fig3.suptitle('Acoustic Potential Field - 2D Heatmaps (xy-plane at z=5mm)', 
+             fontsize=16, fontweight='bold')
+
+# Flower of Life Heatmap
+ax1 = fig3.add_subplot(1, 3, 1)
+im1 = ax1.imshow(U_fol*1e6, extent=[-40, 40, -40, 40], origin='lower', 
+                cmap='RdYlBu_r', aspect='equal', interpolation='bilinear')
+# Overlay emitter positions
+ax1.scatter(fol_positions[:,0]*1000, fol_positions[:,1]*1000, 
+           c='black', s=200, marker='o', edgecolors='white', linewidths=2.5, 
+           label='Emitters', zorder=10)
+ax1.set_title('Flower of Life (Golden Ratio)', fontweight='bold', fontsize=14)
+ax1.set_xlabel('X Position (mm)', fontweight='bold')
+ax1.set_ylabel('Y Position (mm)', fontweight='bold')
+ax1.grid(True, alpha=0.3, linestyle='--')
+cbar1 = plt.colorbar(im1, ax=ax1, label='Potential U (μJ)', fraction=0.046)
+ax1.legend(loc='upper right', fontsize=10)
+
+# Add center marker
+ax1.plot(0, 0, 'w+', markersize=15, markeredgewidth=3, label='Trap Center')
+
+# Square Grid Heatmap
+ax2 = fig3.add_subplot(1, 3, 2)
+im2 = ax2.imshow(U_square*1e6, extent=[-40, 40, -40, 40], origin='lower', 
+                cmap='RdYlBu_r', aspect='equal', interpolation='bilinear')
+ax2.scatter(square_positions[:,0]*1000, square_positions[:,1]*1000, 
+           c='black', s=200, marker='o', edgecolors='white', linewidths=2.5, 
+           label='Emitters', zorder=10)
+ax2.set_title('Square Grid', fontweight='bold', fontsize=14)
+ax2.set_xlabel('X Position (mm)', fontweight='bold')
+ax2.set_ylabel('Y Position (mm)', fontweight='bold')
+ax2.grid(True, alpha=0.3, linestyle='--')
+cbar2 = plt.colorbar(im2, ax=ax2, label='Potential U (μJ)', fraction=0.046)
+ax2.legend(loc='upper right', fontsize=10)
+ax2.plot(0, 0, 'w+', markersize=15, markeredgewidth=3)
+
+# Random Placement Heatmap
+ax3 = fig3.add_subplot(1, 3, 3)
+im3 = ax3.imshow(U_random*1e6, extent=[-40, 40, -40, 40], origin='lower', 
+                cmap='RdYlBu_r', aspect='equal', interpolation='bilinear')
+ax3.scatter(random_positions_array[:,0]*1000, random_positions_array[:,1]*1000, 
+           c='black', s=200, marker='o', edgecolors='white', linewidths=2.5, 
+           label='Emitters', zorder=10)
+ax3.set_title('Random Placement', fontweight='bold', fontsize=14)
+ax3.set_xlabel('X Position (mm)', fontweight='bold')
+ax3.set_ylabel('Y Position (mm)', fontweight='bold')
+ax3.grid(True, alpha=0.3, linestyle='--')
+cbar3 = plt.colorbar(im3, ax=ax3, label='Potential U (μJ)', fraction=0.046)
+ax3.legend(loc='upper right', fontsize=10)
+ax3.plot(0, 0, 'w+', markersize=15, markeredgewidth=3)
+
+plt.tight_layout()
+plt.savefig('potential_heatmaps.png', dpi=300, bbox_inches='tight')
+print("✓ Saved: potential_heatmaps.png")
+
+# ============================================================================
+# DETAILED SINGLE GEOMETRY ANALYSIS (FLOWER OF LIFE)
+# ============================================================================
+
+print("Generating detailed FoL analysis...")
+
+fig4 = plt.figure(figsize=(16, 10))
+fig4.suptitle('Flower of Life Geometry - Detailed Field Analysis', 
+             fontsize=16, fontweight='bold')
+
+# Top left: High-res heatmap
+ax1 = fig4.add_subplot(2, 2, 1)
+im1 = ax1.imshow(U_fol*1e6, extent=[-40, 40, -40, 40], origin='lower', 
+                cmap='seismic', aspect='equal', interpolation='bilinear')
+ax1.scatter(fol_positions[:,0]*1000, fol_positions[:,1]*1000, 
+           c='yellow', s=250, marker='*', edgecolors='black', linewidths=2, 
+           label='Emitters', zorder=10)
+ax1.set_title('Potential Field', fontweight='bold')
+ax1.set_xlabel('X (mm)')
+ax1.set_ylabel('Y (mm)')
+plt.colorbar(im1, ax=ax1, label='U (μJ)')
+ax1.plot(0, 0, 'w+', markersize=20, markeredgewidth=4)
+
+# Top right: Contour lines
+ax2 = fig4.add_subplot(2, 2, 2)
+levels = np.linspace(np.min(U_fol*1e6), np.max(U_fol*1e6), 25)
+contour = ax2.contour(X*1000, Y*1000, U_fol*1e6, levels=levels, 
+                     colors='black', linewidths=0.5, alpha=0.3)
+contourf = ax2.contourf(X*1000, Y*1000, U_fol*1e6, levels=levels, 
+                       cmap='viridis', alpha=0.8)
+ax2.scatter(fol_positions[:,0]*1000, fol_positions[:,1]*1000, 
+           c='red', s=250, marker='o', edgecolors='white', linewidths=3, 
+           label='Emitters', zorder=10)
+ax2.set_title('Equipotential Contours', fontweight='bold')
+ax2.set_xlabel('X (mm)')
+ax2.set_ylabel('Y (mm)')
+ax2.set_aspect('equal')
+plt.colorbar(contourf, ax=ax2, label='U (μJ)')
+ax2.clabel(contour, inline=True, fontsize=8)
+
+# Bottom left: Gradient magnitude (force field strength)
+ax3 = fig4.add_subplot(2, 2, 3)
+U_fol_grad_y, U_fol_grad_x = np.gradient(U_fol*1e6)
+gradient_magnitude = np.sqrt(U_fol_grad_x**2 + U_fol_grad_y**2)
+im3 = ax3.imshow(gradient_magnitude, extent=[-40, 40, -40, 40], origin='lower',
+                cmap='hot', aspect='equal', interpolation='bilinear')
+ax3.scatter(fol_positions[:,0]*1000, fol_positions[:,1]*1000, 
+           c='cyan', s=200, marker='o', edgecolors='white', linewidths=2, zorder=10)
+ax3.set_title('Force Field Strength |∇U|', fontweight='bold')
+ax3.set_xlabel('X (mm)')
+ax3.set_ylabel('Y (mm)')
+plt.colorbar(im3, ax=ax3, label='|∇U| (μJ/mm)')
+
+# Bottom right: Zoomed center region with streamlines
+ax4 = fig4.add_subplot(2, 2, 4)
+# Zoom to central 20mm × 20mm
+zoom_range = 20
+x_zoom = x_range[np.abs(x_range*1000) <= zoom_range]
+y_zoom = y_range[np.abs(y_range*1000) <= zoom_range]
+X_zoom, Y_zoom = np.meshgrid(x_zoom, y_zoom)
+Z_zoom = np.zeros_like(X_zoom) + z_levitation
+
+# Recalculate for zoom region
+U_fol_zoom = np.zeros_like(X_zoom)
+for i in range(X_zoom.shape[0]):
+    for j in range(X_zoom.shape[1]):
+        U_fol_zoom[i, j] = gor_kov_potential(fol_positions, X_zoom[i,j], Y_zoom[i,j], Z_zoom[i,j])
+
+# Plot with streamlines
+im4 = ax4.imshow(U_fol_zoom*1e6, extent=[-zoom_range, zoom_range, -zoom_range, zoom_range], 
+                origin='lower', cmap='RdYlBu_r', aspect='equal', interpolation='bilinear')
+# Add force field streamlines
+U_zoom_grad_y, U_zoom_grad_x = np.gradient(U_fol_zoom*1e6)
+ax4.streamplot(X_zoom*1000, Y_zoom*1000, -U_zoom_grad_x, -U_zoom_grad_y, 
+              color='white', density=1.5, linewidth=1, arrowsize=1.5)
+# Show only emitters in view
+mask = np.sqrt(fol_positions[:,0]**2 + fol_positions[:,1]**2) * 1000 <= zoom_range
+ax4.scatter(fol_positions[mask,0]*1000, fol_positions[mask,1]*1000, 
+           c='yellow', s=300, marker='*', edgecolors='black', linewidths=2, zorder=10)
+ax4.set_title('Central Trap Detail (±20mm)', fontweight='bold')
+ax4.set_xlabel('X (mm)')
+ax4.set_ylabel('Y (mm)')
+ax4.plot(0, 0, 'w+', markersize=20, markeredgewidth=4)
+plt.colorbar(im4, ax=ax4, label='U (μJ)')
+
+plt.tight_layout()
+plt.savefig('fol_detailed_analysis.png', dpi=300, bbox_inches='tight')
+print("✓ Saved: fol_detailed_analysis.png")
+
+print("\nAll visualizations complete!")
+print("\nGenerated files:")
+print("  1. gor_kov_comparison.png - 3D surfaces + contours + bar chart")
+print("  2. line_profiles.png - 1D cross-sections")
+print("  3. potential_heatmaps.png - 2D heatmaps side-by-side")
+print("  4. fol_detailed_analysis.png - Detailed FoL field with streamlines")
+
 # ============================================================================
 # LINE PROFILE COMPARISON
 # ============================================================================
@@ -383,10 +542,18 @@ plt.tight_layout()
 plt.savefig('line_profiles.png', dpi=300, bbox_inches='tight')
 print("✓ Saved: line_profiles.png")
 
-print("\nSimulation complete!")
-print("\nFiles generated:")
-print("  - gor_kov_comparison.png (3D surfaces + contours + bar chart)")
-print("  - line_profiles.png (detailed 1D profiles)")
+# ============================================================================
+# FINAL SUMMARY
+# ============================================================================
+
+print("\n" + "=" * 70)
+print("SIMULATION COMPLETE!")
+print("=" * 70)
+print("\nGenerated files:")
+print("  1. gor_kov_comparison.png - 3D surfaces + contours + bar chart")
+print("  2. line_profiles.png - 1D cross-sections")
+print("  3. potential_heatmaps.png - 2D heatmaps side-by-side")
+print("  4. fol_detailed_analysis.png - Detailed FoL field with streamlines")
 print("\nConclusion:")
 print("  Flower of Life geometry with golden ratio spacing creates")
 print("  significantly deeper acoustic potential wells compared to")
