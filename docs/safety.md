@@ -1,704 +1,420 @@
-﻿# Safety Guidelines for Acoustic Levitation Systems
+﻿# Safety Guide - Acoustic Levitation
 
-**READ THIS BEFORE BUILDING OR OPERATING ANY LEVITATION SYSTEM**
+⚠️ **READ THIS BEFORE BUILDING OR OPERATING ANY ACOUSTIC LEVITATION DEVICE**
 
----
+## Overview
 
-## ⚠️ Critical Safety Statement
-
-Acoustic levitation systems use high-intensity ultrasonic sound. While generally safe when used properly, they can cause harm if misused.
-
-**By building and operating these systems, you accept all responsibility for:**
-- Your own safety
-- Safety of others nearby
-- Damage to property
-- Compliance with local regulations
-
-**The authors and contributors provide these designs "AS IS" with NO WARRANTY and NO LIABILITY for any harm or damage.**
+Acoustic levitation uses high-intensity ultrasonic sound waves (typically 40 kHz) to create standing wave patterns that can trap and manipulate small objects. While fascinating, this technology involves real hazards that must be understood and managed.
 
 ---
 
-## Risk Assessment by Build Level
+## 🚨 Critical Safety Warnings
 
-### Build 1 (Micro-Scale): LOW RISK
+### 1. Hearing Damage Risk
 
-**Power level:** 5-10W  
-**SPL:** 120-130 dB at 40kHz  
-**Risk level:** Minimal with basic precautions
+**THE DANGER:**
+- 40 kHz is technically "ultrasonic" (above 20 kHz human hearing range)
+- **However:** Transducers produce harmonics and subharmonics in audible range
+- High sound pressure levels (>110 dB SPL) can cause permanent hearing damage
+- Young people (under 25) can often hear up to 22-24 kHz - partial ultrasonic perception is possible
 
-**Primary hazards:**
-- Electrical (12V, low risk)
-- Falling objects (small mass, low impact)
-- Hearing (prolonged exposure)
-- Eye injury (if components fail)
+**PROTECTION REQUIRED:**
+- ✅ Wear hearing protection (earplugs or earmuffs) when operating above 50% power
+- ✅ Limit exposure time: <15 minutes per hour at high power
+- ✅ Never operate at full power in enclosed spaces
+- ✅ Keep devices at least 50cm away from your head
+- ❌ **NEVER point active emitters at your ears**
 
-**Mitigation:** Wear safety glasses, limit exposure time, follow electrical safety
+**WARNING SIGNS OF OVEREXPOSURE:**
+- Ringing in ears (tinnitus)
+- Temporary hearing loss or muffling
+- Headache or pressure sensation
+- Dizziness or nausea
 
----
-
-### Build 2 (Lab-Scale): MODERATE RISK
-
-**Power level:** 100-300W  
-**SPL:** 140-150 dB at 40kHz  
-**Risk level:** Requires proper safety protocols
-
-**Primary hazards:**
-- Acoustic intensity (can cause discomfort/damage)
-- Electrical (48V, shock hazard)
-- Falling objects (1kg can injure)
-- Component failure (explosive at high power)
-
-**Mitigation:** Enclosed operation, hearing protection, emergency stop, electrical safety training
+*If you experience any of these, STOP IMMEDIATELY and rest for 24 hours.*
 
 ---
 
-### Build 3 (Human-Scale): HIGH RISK
+### 2. Transducer Overheating
 
-**Power level:** 2-5 kW  
-**SPL:** 150-160 dB at 40kHz  
-**Risk level:** Industrial safety standards required
+**THE DANGER:**
+- Ultrasonic transducers generate significant heat during operation
+- Overheating causes:
+  - Permanent depoling (loss of piezoelectric properties)
+  - Cracked ceramics
+  - Solder joint failure
+  - Fire hazard (rare but possible)
 
-**Primary hazards:**
-- Acoustic intensity (serious injury possible)
-- Electrical (industrial voltages, arc flash)
-- Falling objects (100kg+ can be fatal)
-- Structural failure (array collapse)
-- Fire (high power)
+**SAFE OPERATING LIMITS:**
 
-**Mitigation:** Full safety enclosure, interlocks, emergency stop, professional electrical installation, operator training, permits/inspections
+| Build Level | Max Power/Emitter | Max Duty Cycle | Cooling Required |
+|-------------|-------------------|----------------|------------------|
+| Build 1 (7)  | 2W continuous     | 100% (with heatsinks) | Passive aluminum fins |
+| Build 2 (19) | 5W continuous     | 80% (4 sec on, 1 sec off) | Active cooling fan |
+| Build 3 (37) | 10W continuous    | 60% (pulse mode) | Water cooling or forced air |
 
----
+**TEMPERATURE MONITORING:**
+- Install thermistors on at least 3 emitters (center + 2 outer)
+- Set firmware cutoff at 65°C (149°F)
+- Add visual/audible temperature warnings at 55°C
 
-## Acoustic Hazards
-
-### Understanding Sound Pressure Level (SPL)
-
-**Decibels (dB):** Logarithmic scale of acoustic intensity
-
-**Reference levels:**
-- 0 dB: Threshold of hearing
-- 60 dB: Normal conversation
-- 90 dB: Lawnmower (hearing damage with prolonged exposure)
-- 120 dB: Threshold of pain (audible frequencies)
-- 140 dB: Immediate hearing damage (audible frequencies)
-
-**For ultrasonic (40kHz):**
-- Not audible to most humans
-- **But damage is still possible!**
-- Thresholds are less well-studied than audible frequencies
-
-### Safe Exposure Limits
-
-**OSHA standards (for audible frequencies):**
-- 90 dB: 8 hours/day maximum
-- 95 dB: 4 hours/day maximum
-- 100 dB: 2 hours/day maximum
-- 105 dB: 1 hour/day maximum
-- 110 dB: 30 minutes/day maximum
-- 115 dB: 15 minutes/day maximum
-
-**For ultrasonic (40kHz):**
-- No established OSHA limits
-- Conservative approach: Use audible frequency limits
-- Research shows potential for hearing damage at high SPL even if inaudible
-
-**Our recommendation:**
-
-| Build | SPL | Maximum Continuous Exposure |
-|-------|-----|----------------------------|
-| Build 1 | 120-130 dB | 1 hour/day |
-| Build 2 | 140-150 dB | 15 minutes/day |
-| Build 3 | 150-160 dB | 5 minutes/day (operator training required) |
-
-### Symptoms of Ultrasonic Exposure
-
-**Immediate effects:**
-- Headache
-- Dizziness
-- Nausea
-- Ear pressure/fullness
-- Tinnitus (ringing in ears)
-
-**Delayed effects (hours to days later):**
-- Fatigue
-- Difficulty concentrating
-- Sleep disturbance
-- Persistent tinnitus
-
-**Long-term effects (repeated exposure):**
-- Hearing loss (permanent)
-- Tinnitus (chronic)
-- Vestibular dysfunction (balance problems)
-
-**If you experience ANY symptoms:**
-1. Stop operation immediately
-2. Leave area
-3. Seek medical attention if symptoms persist
-4. Do not resume operation until symptoms resolve
-5. Reduce power or increase distance for future operation
+**HEATSINK REQUIREMENTS:**
+- Build 1: 20mm × 20mm aluminum heatsink per emitter (optional but recommended)
+- Build 2: 30mm × 30mm heatsink + 40mm cooling fan (required)
+- Build 3: Custom water cooling loop or industrial blower (required)
 
 ---
 
-## Electrical Hazards
+### 3. Electrical Safety
 
-### Voltage Levels and Risk
+**HIGH VOLTAGE HAZARDS:**
+- Transducers require 20-40V peak-to-peak drive signals
+- Amplifier circuits can produce 100V+ spikes during switching
+- Risk of electric shock if touched while powered
 
-**Build 1 (12V DC):**
-- Generally safe (below 50V threshold)
-- Can cause burns if short-circuited
-- Battery/PSU can deliver high current
+**SAFE PRACTICES:**
+- ✅ Use isolated power supplies (no direct AC mains connection)
+- ✅ Add proper grounding to all metal enclosures
+- ✅ Include fuses: 2A for Build 1, 5A for Build 2, 10A for Build 3
+- ✅ Use insulated wire (rated for 300V minimum)
+- ✅ Add emergency shutoff switch within arm's reach
+- ❌ **NEVER touch circuits while powered**
+- ❌ **NEVER operate with exposed high-voltage traces**
 
-**Build 2 (48V DC):**
-- Approaching hazardous threshold
-- Shock possible (especially if wet)
-- Can cause involuntary muscle contractions
-
-**Build 3 (Industrial voltages, potentially 120-240V AC):**
-- Lethal shock hazard
-- Arc flash risk
-- Requires licensed electrician
-
-### Electrical Safety Practices
-
-**All builds:**
-- [ ] Disconnect power before touching any wiring
-- [ ] Use insulated tools
-- [ ] Check for shorts with multimeter before power-on
-- [ ] Keep liquids away from electronics
-- [ ] Don't work on live circuits (if you can avoid it)
-- [ ] Have fire extinguisher nearby (Class C - electrical)
-
-**Build 2-3 additionally:**
-- [ ] Use GFCI/RCD protection (ground fault protection)
-- [ ] Proper grounding of all metal enclosures
-- [ ] Insulated work area (rubber mat)
-- [ ] One hand in pocket when working near live circuits (prevents current through heart)
-- [ ] Lockout/tagout procedures for maintenance
-- [ ] Arc-rated PPE (for Build 3)
-
-### Signs of Electrical Problems
-
-**Stop immediately if you observe:**
-- Smoke or burning smell
-- Sparks or arcing
-- Components very hot to touch (>60°C / 140°F)
-- Discoloration of wiring insulation
-- Buzzing/crackling sounds from power supply
-- Unexpected voltage measurements
-
-**Troubleshoot offline (power disconnected), never live.**
+**CAPACITOR DISCHARGE:**
+- Power supply capacitors can hold dangerous charge after power-off
+- Wait 60 seconds after unplugging before touching circuits
+- Use a 10kΩ bleed resistor across main power capacitor
 
 ---
 
-## Mechanical Hazards
+### 4. Particle Selection Safety
 
-### Falling Objects
+**SAFE PARTICLES:**
+- ✅ Expanded polystyrene foam beads (EPS)
+- ✅ Ping pong balls (celluloid or ABS)
+- ✅ Paper confetti
+- ✅ Small water droplets (<2mm)
+- ✅ Styrofoam peanuts
 
-**All builds have falling object risk.**
+**UNSAFE PARTICLES - DO NOT USE:**
+- ❌ **Metal objects** (create eddy currents, can become projectiles)
+- ❌ **Sharp objects** (safety hazard if ejected)
+- ❌ **Toxic materials** (beryllium, lead, asbestos)
+- ❌ **Flammable liquids** (alcohol, acetone, gasoline)
+- ❌ **Living insects** (ethical concerns + unpredictable behavior)
+- ❌ **Any particle >20mm diameter** (exceeds acoustic wavelength limit)
 
-**Severity:**
-- Build 1: 5-50g → minor bruise, possible eye injury
-- Build 2: 1kg → significant bruise, broken finger possible
-- Build 3: 100kg → serious injury or death
+**PARTICLE SIZE LIMITS:**
 
-**Mitigation:**
+For 40 kHz (λ = 8.575 mm):
+- **Optimal:** 0.1λ to 0.5λ (0.86mm to 4.3mm diameter)
+- **Maximum:** 0.8λ (6.9mm diameter)
+- **Above 0.8λ:** Trapping becomes unstable, particles may be ejected violently
 
-**For all builds:**
-- [ ] Wear safety glasses (ANSI Z87.1 rated)
-- [ ] Clear area below levitation zone
-- [ ] Start with soft/light test objects
-- [ ] Don't levitate over people or valuable equipment
-- [ ] Have second person spot you during tests
-
-**For Build 2-3:**
-- [ ] Safety cage/enclosure around levitation zone
-- [ ] Emergency stop accessible
-- [ ] Warning lights when system active
-- [ ] Soft landing cushion in case of failure
-- [ ] Never put body parts in active field
-
-### Component Failure
-
-**High-power ultrasonic transducers can fail explosively.**
-
-**Risk factors:**
-- Over-voltage
-- Over-current
-- Thermal runaway
-- Manufacturing defects
-- Resonance at wrong frequency
-
-**Symptoms before failure:**
-- Transducer getting very hot
-- Change in sound (cracking, popping)
-- Reduced output
-- Visible damage to element
-
-**Mitigation:**
-- [ ] Current limiting on each transducer
-- [ ] Thermal monitoring (>85°C shutdown)
-- [ ] Operate at <80% of rated power
-- [ ] Inspect transducers regularly
-- [ ] Replace if any damage visible
-- [ ] Safety enclosure (contains fragments)
+**EJECTION HAZARDS:**
+- Particles can be ejected at >5 m/s if power is too high or suddenly cut
+- Wear safety glasses when levitating particles >3mm
+- Use transparent shields around levitation zone for Build 2/3
 
 ---
 
-## Physiological Effects
+### 5. Phase Alignment Warnings
 
-### Who Should NOT Operate These Systems
+**DESTRUCTIVE INTERFERENCE RISK:**
 
-**Absolute contraindications:**
-- Pregnant women (ultrasound effects on fetus unknown)
-- People with pacemakers or medical implants
-- People with recent ear surgery
-- People with active ear infections
-- Children under 16 (still-developing hearing)
+When multiple emitters operate, phase relationships are CRITICAL:
 
-**Relative contraindications (use caution):**
-- People with hearing loss (more susceptible to further damage)
-- People with tinnitus (may worsen)
-- People prone to migraines (ultrasound can trigger)
-- People with epilepsy (bright lights + sound may trigger seizures)
+**DANGER SCENARIO:**
+- Incorrect phasing causes destructive interference
+- Instead of levitating, particles are ACCELERATED
+- Can create high-velocity projectiles (>10 m/s)
 
-**If you have any medical conditions, consult your doctor before operating.**
+**SAFE PHASE PRACTICES:**
+- ✅ Always test with single emitter first
+- ✅ Add emitters one at a time while monitoring pressure field
+- ✅ Use oscilloscope to verify all emitters are in-phase (±10° tolerance)
+- ✅ Include firmware phase verification routine
+- ❌ **NEVER operate with unknown phase relationships**
 
-### Hearing Protection
+**PHASE TESTING PROCEDURE:**
+1. Start with center emitter only (if multi-ring array)
+2. Add one outer emitter and verify constructive interference
+3. Measure sound pressure at trap center - should INCREASE by >50%
+4. If pressure decreases, phase is inverted - fix immediately
+5. Repeat for each emitter
 
-**Build 1:**
-- Optional but recommended for extended operation
-- Foam earplugs (NRR 20-30) adequate
-
-**Build 2:**
-- Recommended for all operation
-- Foam earplugs or earmuffs (NRR 25-35)
-
-**Build 3:**
-- REQUIRED for all personnel in area
-- Industrial hearing protection (NRR 30-35)
-- Dual protection (earplugs + earmuffs) for prolonged exposure
-
-**Note:** Hearing protection is primarily for audible harmonics and amplifier noise. Ultrasonic protection is limited.
-
-### Other PPE (Personal Protective Equipment)
-
-**All builds:**
-- Safety glasses (ANSI Z87.1)
-- Closed-toe shoes
-- No loose clothing near moving parts
-
-**Build 2-3:**
-- Hearing protection
-- Lab coat (protects from minor spills/debris)
-- Insulated gloves (when working on power systems)
-
-**Build 3 additionally:**
-- Hard hat (if overhead hazards)
-- High-visibility vest (if multiple personnel)
-- Arc-rated PPE (when working on live electrical)
+**MICROPHONE SETUP FOR PHASE TESTING:**
+- Use ultrasonic microphone (40 kHz response)
+- Place at expected trap center (z = 5-10mm above array)
+- Measure SPL - should be >120 dB with all emitters active
+- If <100 dB, phase alignment is wrong
 
 ---
 
-## Operational Safety Procedures
+### 6. Biological Exposure Limits
 
-### Pre-Operation Checklist
+**ULTRASONIC BIOEFFECTS:**
 
-**Before every power-on:**
+Research shows potential biological effects above certain exposure levels:
 
-- [ ] Visual inspection (no visible damage, loose wires, etc.)
-- [ ] Area clear (no people/objects in drop zone)
-- [ ] Safety equipment ready (glasses, hearing protection)
-- [ ] Emergency stop accessible
-- [ ] Fire extinguisher in reach
-- [ ] All personnel briefed on hazards
-- [ ] Test object secured to reflector plate
-- [ ] Power supply voltage verified correct
-- [ ] All grounds connected
+**SAFE EXPOSURE LIMITS (40 kHz):**
+- **Spatial Peak Temporal Average Intensity (ISPTA):** <100 mW/cm²
+- **Mechanical Index (MI):** <1.9
+- **Thermal Index (TI):** <2.0
+
+**DO NOT:**
+- ❌ Place hands/arms in high-intensity acoustic field (>130 dB SPL)
+- ❌ Expose skin to direct ultrasonic beam for >60 seconds
+- ❌ Operate near pregnant women (unknown fetal effects)
+- ❌ Use around young children (<12 years old)
+
+**OBSERVED BIOEFFECTS AT HIGH INTENSITIES:**
+- Skin warming (>140 dB SPL)
+- Cavitation in fluids (>150 dB SPL, can damage tissues)
+- Microstreaming effects in cells (research ongoing)
+
+**If performing biological experiments:**
+- Consult institutional biosafety committee
+- Follow FDA/NIH guidelines for ultrasonic exposure
+- Document all exposure parameters (frequency, intensity, duration)
+
+---
+
+## 🔬 Lab Safety Requirements
+
+### Minimum Safety Equipment
+
+**Required for all builds:**
+- [ ] Safety glasses (ANSI Z87.1 rated)
+- [ ] Hearing protection (NRR 25+ dB)
+- [ ] Fire extinguisher (Class C electrical)
+- [ ] First aid kit
+- [ ] Emergency shutoff switch (large, red, easily accessible)
+
+**Required for Build 2+:**
+- [ ] Fume extractor (if soldering)
+- [ ] Multimeter with voltage/current monitoring
+- [ ] Thermal camera or IR thermometer
+- [ ] Ultrasonic microphone for field measurement
+
+**Required for Build 3:**
+- [ ] Faraday cage or grounded enclosure
+- [ ] Interlock switches on access panels
+- [ ] Automatic shutoff on overtemperature
+- [ ] Ventilation system (if using high power for extended periods)
+
+---
+
+## 🚑 Emergency Procedures
+
+### Hearing Overexposure
+1. Turn off device immediately
+2. Move to quiet environment
+3. Rest ears for 24 hours (no headphones, loud music, etc.)
+4. If tinnitus persists >48 hours, see audiologist
+
+### Thermal Burn from Transducer
+1. Turn off device
+2. Cool affected area with room-temperature water (not ice)
+3. Do not apply ointments
+4. If blistering occurs, seek medical attention
+
+### Electrical Shock
+1. Do not touch victim if still in contact with power source
+2. Cut power at breaker/unplug device
+3. Call emergency services if unconscious or burn visible
+4. Perform CPR if trained and necessary
+
+### Fire
+1. Activate emergency shutoff
+2. Use Class C fire extinguisher (do not use water!)
+3. Evacuate if fire spreads beyond device
+4. Call fire department if unable to extinguish within 10 seconds
+
+---
+
+## 📏 Safe Operating Procedures
+
+### Before Every Use
+
+1. **Visual Inspection:**
+   - Check all wiring for fraying or exposed conductors
+   - Verify heatsinks are attached and thermal paste is present
+   - Ensure no particles are stuck to emitter surfaces
+   - Confirm all mounting screws are tight
+
+2. **Power-On Sequence:**
+   - Connect to power supply (device OFF)
+   - Turn on cooling system (if applicable)
+   - Wait 5 seconds for cooling to stabilize
+   - Power on control electronics
+   - Ramp up emitter power slowly (10% increments)
+   - Monitor temperature continuously
+
+3. **Functional Tests:**
+   - Verify all emitters are oscillating (check with phone camera - you'll see flickering)
+   - Measure sound pressure level (should be >110 dB at trap center)
+   - Test with single foam bead before attempting larger particles
 
 ### During Operation
 
-- [ ] Monitor system continuously (don't leave unattended)
-- [ ] Watch for signs of overheating, unusual sounds, smoke
-- [ ] Limit exposure time (see exposure limits above)
-- [ ] Keep hands/face away from active field
-- [ ] Don't disassemble or adjust while powered
-- [ ] Have second person present (for Build 2-3)
+- Monitor temperature every 5 minutes (or continuously via display)
+- Keep workspace clear of flammable materials
+- Maintain ventilation (open window or fan)
+- Never leave operating device unattended
+- Limit continuous operation: 30 min (Build 1), 20 min (Build 2), 15 min (Build 3)
 
-### Emergency Procedures
+### After Use
 
-**If something goes wrong:**
+1. Ramp power down slowly (don't shut off abruptly)
+2. Allow cooling system to run for 2 minutes after power-off
+3. Disconnect from power supply
+4. Allow transducers to cool to room temperature (15-30 minutes)
+5. Clean any debris from emitter surfaces with soft brush
 
-1. **STOP IMMEDIATELY** - Press emergency stop or unplug power
-2. **Evacuate area** - Get everyone away from system
-3. **Assess situation** - Is there fire? Injury? Electrical hazard?
-4. **Call for help** - 911 if needed, supervisor/safety officer otherwise
-5. **Secure area** - Prevent others from approaching
-6. **Document** - Take photos, write incident report
-7. **Don't restart** - Until root cause identified and fixed
+---
 
-**Emergency contacts (post visibly):**
-- Emergency services: 911 (US), 999 (UK), 112 (EU)
+## 🧪 Research Ethics
+
+If using acoustic levitation for biological research:
+
+**Invertebrates (insects, etc.):**
+- Limit exposure to <5 minutes
+- Monitor for stress behaviors (erratic movement)
+- Provide recovery period between trials
+- Follow institutional animal care guidelines
+
+**Living cells/tissues:**
+- Document all exposure parameters
+- Compare with control samples
+- Check for cavitation damage (cell lysis)
+- Follow IRB/biosafety protocols
+
+**DO NOT attempt:**
+- Levitating vertebrate animals (mammals, birds, reptiles, amphibians, fish)
+- Human levitation experiments (even partial - hand, finger, etc.)
+- Any experiment not approved by ethics review board
+
+---
+
+## 📚 Regulatory Compliance
+
+### United States
+
+**FCC Regulations (RF Emissions):**
+- 40 kHz is below FCC Part 15 regulated spectrum (>9 kHz is technically covered, but enforcement is rare)
+- Maintain good shielding to prevent electromagnetic interference
+- If selling devices commercially, may require FCC testing
+
+**OSHA (Workplace Safety):**
+- If used in workplace, follow OSHA noise exposure limits
+- Post warning signs for ultrasonic hazards
+- Provide PPE (hearing protection) to all workers
+
+**FDA (Medical Devices):**
+- If making therapeutic claims, device becomes medical device (requires 510(k) clearance)
+- Research/educational use is exempt but document everything
+
+### International
+
+**CE Marking (Europe):**
+- Required for commercial sale in EU
+- Must meet EMC Directive 2014/30/EU
+- Must meet Low Voltage Directive 2014/35/EU
+
+**Other Regions:**
+- Check local regulations for ultrasonic devices
+- Some countries restrict high-power ultrasonic equipment
+- Educational/research use is generally permitted
+
+---
+
+## ⚖️ Legal Disclaimer
+
+**READ CAREFULLY:**
+
+This project is provided for educational and research purposes only. The authors and contributors:
+
+- Make NO warranties about safety or fitness for any purpose
+- Are NOT liable for injuries, property damage, or hearing loss
+- Are NOT responsible for regulatory non-compliance
+- Do NOT endorse any specific use case
+
+**BY BUILDING THIS DEVICE YOU AGREE:**
+- You are solely responsible for safe operation
+- You will follow all applicable laws and regulations
+- You understand the risks and accept them voluntarily
+- You will not hold authors liable for any damages
+
+**If you are under 18:**
+- Obtain parental/guardian permission
+- Work under adult supervision at all times
+- Follow all safety guidelines strictly
+
+**Commercial Use:**
+- This design is MIT licensed (free to use/modify)
+- Commercial builders must obtain own safety certifications
+- No liability extends to commercial derivatives
+
+---
+
+## 📞 Resources
+
+**Emergency Contacts:**
+- Local emergency services: 911 (US) / 112 (EU)
 - Poison control: 1-800-222-1222 (US)
-- Electrical emergency: Local utility company
-- Facility safety officer: [Your contact info]
+- Electrical safety: Contact local fire department non-emergency
+
+**Safety Information:**
+- OSHA Ultrasonic Guidelines: https://www.osha.gov/
+- FDA Ultrasound Guidance: https://www.fda.gov/
+- IEEE Standards (C95.1): Ultrasonic exposure limits
+
+**Acoustic Safety Papers:**
+- Duck, F. (2007). "Medical and non-medical protection standards for ultrasound and infrasound"
+- Nyborg, W. L. (2001). "Biological effects of ultrasound: development of safety guidelines"
 
 ---
 
-## Environmental Considerations
+## ✅ Safety Checklist
 
-### Acoustic Pollution
+Print this and check before EVERY use:
 
-**Ultrasonic noise can affect:**
-- Pets (dogs, cats can hear up to 45-60 kHz)
-- Wildlife (bats, rodents, insects)
-- Sensitive electronic equipment
-- Neighbors (through walls, especially in apartments)
+### Pre-Operation
+- [ ] Safety glasses on
+- [ ] Hearing protection on
+- [ ] Fire extinguisher within reach
+- [ ] Emergency shutoff accessible
+- [ ] Workspace clear of flammables
+- [ ] Ventilation adequate
+- [ ] Visual inspection complete
+- [ ] No bystanders within 2 meters
 
-**Mitigation:**
-- [ ] Operate away from pets
-- [ ] Not near wildlife habitats (if outdoors)
-- [ ] Acoustic shielding (foam walls reduce transmission)
-- [ ] Inform neighbors if in shared building
-- [ ] Limit operation to reasonable hours (not 2 AM)
+### During Operation
+- [ ] Temperature <65°C
+- [ ] Sound level <140 dB SPL (measured)
+- [ ] All emitters functioning
+- [ ] Cooling system operational
+- [ ] No unusual odors (burning)
+- [ ] No unusual sounds (crackling)
+- [ ] Timer set for max operation duration
 
-### Electromagnetic Interference (EMI)
-
-**High-frequency switching can cause:**
-- Radio/TV interference
-- Wi-Fi disruption
-- Interference with medical devices (pacemakers)
-
-**Mitigation:**
-- [ ] Shielded cables where possible
-- [ ] Grounding of enclosures
-- [ ] Ferrite beads on power cables
-- [ ] Distance from sensitive equipment
-- [ ] FCC compliance testing (if commercial)
-
-### Heat Dissipation
-
-**High-power systems generate significant heat.**
-
-**Fire hazards:**
-- Hot transducers near flammable materials
-- Amplifiers overheating
-- Wiring insulation melting
-- Power supply failure
-
-**Mitigation:**
-- [ ] Adequate ventilation
-- [ ] Fire-resistant mounting materials
-- [ ] Thermal monitoring and shutdown
-- [ ] Keep flammables away (paper, cloth, etc.)
-- [ ] Fire extinguisher (Class C for electrical)
+### Post-Operation
+- [ ] Power ramped down slowly
+- [ ] Cooling allowed to run
+- [ ] Transducers cool to touch
+- [ ] No damage observed
+- [ ] Workspace cleaned
+- [ ] Device secured/stored safely
 
 ---
 
-## Specific Build Considerations
+**🛡️ WHEN IN DOUBT, DON'T TURN IT ON. Safety first, always.**
 
-### Build 1 Specific Safety
-
-**Primary concerns:**
-- Soldering burns
-- Eye injury from falling small objects
-- Minor electrical shock (unlikely at 12V)
-
-**Specific precautions:**
-- Unplug soldering iron when not in use
-- Use helping hands or vice to hold parts
-- Solder in ventilated area (lead fumes)
-- Safety glasses during all testing
-- Don't touch transducers while powered (vibration can be uncomfortable)
-
-**Low-risk build, but still follow basic safety.**
+**Questions? See [FAQ](faq.md) or contact the community via GitHub Discussions.**
 
 ---
 
-### Build 2 Specific Safety
-
-**Primary concerns:**
-- Acoustic intensity (140-150 dB possible)
-- 48V electrical system (shock hazard)
-- 1kg object falling from height
-- FPGA programming errors (could cause unsafe operation)
-
-**Specific precautions:**
-- **Enclosure required** (acrylic box with interlocked door)
-- Hearing protection during operation
-- Emergency stop button (breaks power to all transducers)
-- Software watchdog (automatic shutdown if control loop hangs)
-- Fall cushion (foam pad below levitation zone)
-- GFCI protection on power supply
-- Calibration procedure (verify safe operation before full power)
-
-**Requires operator training and written procedures.**
-
----
-
-### Build 3 Specific Safety
-
-**This is an INDUSTRIAL SYSTEM. Treat it accordingly.**
-
-**Required safety systems:**
-- Light curtain or safety cage (prevents access while operating)
-- Emergency stop (mushroom button, breaks all power)
-- Warning lights and horn (system active indicator)
-- Interlocked doors (system stops if opened)
-- Redundant safety relays (fail-safe design)
-- Thermal shutdown (multiple temperature sensors)
-- Current limiting (per-transducer and total)
-- Tilt sensors (shutdown if platform tilts >5°)
-- UPS backup (graceful shutdown on power loss)
-
-**Required procedures:**
-- Lockout/tagout for maintenance
-- Permit to work (for non-operators)
-- Daily inspection checklist
-- Monthly safety system testing
-- Annual professional inspection
-
-**Required training:**
-- Operator certification (8-hour course)
-- Electrical safety (NFPA 70E)
-- First aid/CPR
-- Emergency procedures
-
-**Liability:**
-- Professional liability insurance recommended
-- Compliance with OSHA (US), HSE (UK), or local authority
-- May require permits for operation
-- Consult with safety professional before building
-
-**Build 3 is NOT a hobbyist project. It's a serious engineering undertaking.**
-
----
-
-## Legal and Regulatory Considerations
-
-### Standards and Codes
-
-**May apply depending on location:**
-- **Electrical:** NFPA 70 (NEC), IEC 60950, local electrical codes
-- **Acoustic:** OSHA 1910.95 (occupational noise), local noise ordinances
-- **Mechanical:** ASME B30 (lifting devices), local building codes
-- **General safety:** ISO 12100 (machinery safety), CE marking (EU)
-
-**Check with local authorities before building Build 2 or 3.**
-
-### Liability and Insurance
-
-**Personal use:**
-- Homeowner's/renter's insurance may not cover "experimental devices"
-- Consider additional liability coverage
-- Keep thorough documentation (shows due diligence)
-
-**Commercial use:**
-- Professional liability insurance required
-- Product liability if selling devices
-- Workers compensation if employees involved
-- Consult with insurance broker
-
-### Permits
-
-**May be required for:**
-- High-power electrical installation (>1kW)
-- Operation in commercial/industrial space
-- Public demonstrations
-- Research involving human subjects (IRB approval)
-
-**Check with:**
-- Building department (structural/electrical permits)
-- Fire marshal (high-power systems)
-- Zoning board (commercial use of residential space)
-- University IRB (if academic research)
-
----
-
-## Testing and Commissioning
-
-### Initial Testing Protocol
-
-**Never go straight to full power.**
-
-**Staged power-up:**
-
-1. **Bench test (no transducers):**
-   - Verify power supply voltages
-   - Test control system (all channels outputting)
-   - Check software (no errors, correct frequencies)
-
-2. **Single transducer test (low power):**
-   - Connect one transducer
-   - Operate at 25% power
-   - Verify 40kHz signal with spectrum analyzer
-   - Check for overheating (should be barely warm)
-
-3. **Full array test (low power):**
-   - Connect all transducers
-   - Operate at 25% power
-   - Verify all channels working
-   - Check phase relationships (if instrumented)
-
-4. **Levitation test (medium power):**
-   - Ramp to 50% power
-   - Attempt levitation with light object
-   - If successful, gradually increase power until stable
-   - Note optimal power level
-
-5. **Full power test (if needed):**
-   - Only if medium power insufficient
-   - Incrementally increase to 75%, then 90%
-   - Monitor temperatures continuously
-   - Stop if any component exceeds 80°C
-
-**Never exceed 90% of rated power for continuous operation.**
-
-### Acceptance Testing
-
-**Before declaring system "complete":**
-
-- [ ] Levitate target mass for 1 hour continuously (no failures)
-- [ ] Disturbance rejection test (poke object, recovers in <5s)
-- [ ] Emergency stop test (all power cuts immediately)
-- [ ] Thermal stability (no thermal runaway after 2 hours)
-- [ ] Repeatability (10 levitation attempts, 100% success)
-- [ ] Safety system test (all interlocks, sensors working)
-- [ ] Documentation complete (procedures, schematics, BOM)
-
-**For Build 3:** Professional safety inspection recommended.
-
----
-
-## Maintenance and Inspection
-
-### Daily (Before Each Use)
-
-- [ ] Visual inspection (no obvious damage)
-- [ ] Test emergency stop
-- [ ] Check power supply output voltage
-- [ ] Verify all transducers producing sound
-
-### Weekly
-
-- [ ] Inspect all connections (tighten if loose)
-- [ ] Check transducer mounting (re-glue if needed)
-- [ ] Clean dust from electronics
-- [ ] Verify acoustic output (spectrum analyzer)
-
-### Monthly
-
-- [ ] Full electrical continuity check
-- [ ] Thermal imaging (look for hot spots)
-- [ ] Mechanical inspection (base platform, mounts)
-- [ ] Calibration check (frequency, phase, amplitude)
-- [ ] Safety system functional test
-- [ ] Update maintenance log
-
-### Annually
-
-- [ ] Replace worn components (transducers have finite life)
-- [ ] Professional electrical inspection (Build 3)
-- [ ] Recalibration
-- [ ] Document any performance degradation
-- [ ] Review and update procedures
-
----
-
-## Decommissioning and Disposal
-
-### Safe Shutdown
-
-**When retiring a system:**
-
-1. **Final power-down**
-   - Disconnect all power sources
-   - Discharge capacitors (wait 5 minutes, then short with insulated tool)
-   - Label "NOT FOR OPERATION"
-
-2. **Disassembly**
-   - Remove transducers carefully (may be fragile)
-   - Desolder components (reuse or recycle)
-   - Separate materials (metal, plastic, electronics)
-
-3. **Disposal**
-   - Electronics: E-waste recycling (contains lead solder)
-   - Transducers: Check for ceramic components (special disposal)
-   - Batteries: Hazardous waste (if present)
-   - Structural: Scrap metal or regular trash (if wood/plastic)
-
-**Never just throw in regular trash** - electronics contain hazardous materials.
-
----
-
-## Conclusion
-
-**Acoustic levitation is inherently safe when designed and operated properly.**
-
-**The keys to safety:**
-1. **Understand the hazards** (read this entire document)
-2. **Design for safety** (interlocks, fail-safes, guards)
-3. **Follow procedures** (checklists, staged testing)
-4. **Use PPE** (glasses, hearing protection)
-5. **Maintain equipment** (regular inspections)
-6. **Train operators** (everyone knows emergency procedures)
-7. **Stay vigilant** (don't get complacent)
-
-**Remember:**
-- Safety is not optional
-- Shortcuts lead to accidents
-- When in doubt, stop and reassess
-- It's better to over-engineer safety than under-engineer it
-
-**If you're not comfortable with any safety aspect of a build, DON'T BUILD IT.**
-
-Either:
-- Build a lower-power version
-- Get professional help
-- Wait until you have proper training/facilities
-
-**No levitation demo is worth an injury.**
-
----
-
-## Resources
-
-**Safety organizations:**
-- OSHA: www.osha.gov (US occupational safety)
-- NIOSH: www.cdc.gov/niosh (research and recommendations)
-- HSE: www.hse.gov.uk (UK workplace safety)
-- ACGIH: www.acgih.org (exposure limit guidelines)
-
-**Standards bodies:**
-- NFPA: www.nfpa.org (electrical codes)
-- IEC: www.iec.ch (international electrical standards)
-- ISO: www.iso.org (international safety standards)
-
-**Training:**
-- Local community colleges (electrical safety courses)
-- Red Cross (first aid/CPR)
-- Online: Coursera, edX (safety engineering)
-
-**Further reading:**
-- WHO: "Environmental Health Criteria 22: Ultrasound"
-- ACGIH: "Threshold Limit Values for Ultrasound"
-- NIOSH: "Occupational Noise Exposure"
-
----
-
-**Questions about safety? Ask before building, not after an accident.**
-
-**GitHub Issues, Discord, or email - we're here to help you build safely.**
-
----
-
-*"Safety doesn't happen by accident."*  
-*- Unknown*
-
-*"Better a thousand times careful than once dead."*  
-*- Proverb*
-
-*"An ounce of prevention is worth a pound of cure."*  
-*- Benjamin Franklin*
-
-*"Build cool things. Stay safe while doing it."*  
-*- Us*
+*Last updated: December 2025*
+*Version: 1.0*
