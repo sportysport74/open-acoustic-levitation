@@ -1,0 +1,175 @@
+# Build 1 - Visual Wiring Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    BUILD 1 WIRING DIAGRAM                                │
+│              7-Emitter Flower of Life Array                              │
+└─────────────────────────────────────────────────────────────────────────┘
+
+                         12V POWER SUPPLY
+                              │
+                    ┌─────────┴─────────┐
+                    │                   │
+                   (+)                 (-)
+                    │                   │
+        ┌───────────┴──────────┐        │
+        │ 2A FUSE (SAFETY!)    │        │
+        └───────────┬──────────┘        │
+                    │                   │
+              12V POWER RAIL            GND RAIL
+                    │                   │
+        ┌───────────┼───────────────────┼──────────────┐
+        │           │                   │              │
+        │      ┌────┴────┐         ┌────┴────┐         │
+        │      │ EMITTER │         │ EMITTER │   ...   │
+        │      │  (+)    │         │  (+)    │         │
+        │      └────┬────┘         └────┬────┘         │
+        │           │(-)                │(-)            │
+        │           │                   │               │
+        │      ┌────▼────┐         ┌────▼────┐         │
+        │      │ MOSFET  │         │ MOSFET  │   ...   │
+        │      │  DRAIN  │         │  DRAIN  │         │
+        │      └────┬────┘         └────┬────┘         │
+        │           │                   │               │
+        │      ┌────┴────┐         ┌────┴────┐         │
+        │      │ MOSFET  │         │ MOSFET  │         │
+        │      │ SOURCE  │         │ SOURCE  │         │
+        │      └────┬────┘         └────┬────┘         │
+        │           │                   │               │
+        │           └───────────────────┴───────────────┤
+        │                                               │
+        └───────────────────────────────────────────────┴─── GND RAIL
+
+
+                        MOSFET DETAIL (Each of 7)
+                    ┌────────────────────────┐
+                    │                        │
+        Arduino ────┤ D2-D8                  │
+         Pin        │   │                    │
+                    │   │                    │
+                    │  ┌▽─────┐              │
+                    │  │ 10kΩ │              │
+                    │  │      │              │
+                    │  └┬─────┘              │
+                    │   │                    │
+                    │  ┌▽────────┐           │
+                    │  │  GATE   │           │
+                    │  │         │ IRLZ44N   │
+                    │  │ MOSFET  │           │
+                    │  │         │           │
+                    │  └─────────┘           │
+                    │   DRAIN  SOURCE        │
+                    │     │      │           │
+                    │     │      └──────────────── GND
+                    │     │                  │
+                    │     └─────────────────────── Emitter (-)
+                    │                        │
+                    └────────────────────────┘
+
+
+                    ARDUINO NANO CONNECTIONS
+            ┌──────────────────────────────────────┐
+            │                                      │
+            │         ┌─────────────┐              │
+            │   D2 ───┤ Center      ├─── MOSFET 1 │
+            │   D3 ───┤ Ring 0°     ├─── MOSFET 2 │
+            │   D4 ───┤ Ring 60°    ├─── MOSFET 3 │
+            │   D5 ───┤ Ring 120°   ├─── MOSFET 4 │
+            │   D6 ───┤ Ring 180°   ├─── MOSFET 5 │
+            │   D7 ───┤ Ring 240°   ├─── MOSFET 6 │
+            │   D8 ───┤ Ring 300°   ├─── MOSFET 7 │
+            │         │             │              │
+            │   VIN ──┤ Power       ├─── 12V Rail  │
+            │   GND ──┤ Ground      ├─── GND Rail  │
+            │         │             │              │
+            │   USB ──┤ Programming │              │
+            │         └─────────────┘              │
+            │                                      │
+            └──────────────────────────────────────┘
+
+
+                    COMPONENT VALUES & SPECS
+        ┌────────────────────────────────────────────────────┐
+        │ Emitters:    HC-SR04 40kHz ultrasonic (16mm)       │
+        │ MOSFETs:     IRLZ44N N-Channel (or IRLB8721)       │
+        │ Resistors:   10kΩ 1/4W (pull-down on gates)        │
+        │ Arduino:     Nano (ATmega328P)                     │
+        │ Power:       12V 2A DC supply                      │
+        │ Fuse:        2A inline (SAFETY CRITICAL!)          │
+        └────────────────────────────────────────────────────┘
+
+
+                    CRITICAL WIRING NOTES
+        ┌────────────────────────────────────────────────────┐
+        │ ⚠️  POLARITY MATTERS!                              │
+        │     - Emitter red (+) to 12V rail                  │
+        │     - Emitter black (-) to MOSFET drain            │
+        │     - Reversed = NO WORK                           │
+        │                                                    │
+        │ ⚠️  MOSFET ORIENTATION CRITICAL!                   │
+        │     - Flat side facing you                         │
+        │     - Left = Gate, Middle = Drain, Right = Source  │
+        │     - Wrong = Magic smoke!                         │
+        │                                                    │
+        │ ⚠️  MUST HAVE PULL-DOWN RESISTORS!                 │
+        │     - 10kΩ from each gate to ground                │
+        │     - Missing = Floating gates = erratic behavior  │
+        │                                                    │
+        │ ⚠️  FUSE IS NOT OPTIONAL!                          │
+        │     - Protects against shorts                      │
+        │     - 2A in 12V power line                         │
+        │     - Could save your house from fire!             │
+        └────────────────────────────────────────────────────┘
+
+
+                    PHASE ALIGNMENT (CRITICAL!)
+        
+        All 7 emitters MUST be driven IDENTICALLY:
+        
+        Signal:     ┌─┐   ┌─┐   ┌─┐   ┌─┐
+        40kHz       │ │   │ │   │ │   │ │
+                  ──┘ └───┘ └───┘ └───┘ └──
+                    
+        Period:     ├─── 25μs ───┤
+        Duty:       50% (12.5μs ON, 12.5μs OFF)
+        
+        ALL 7 SIGNALS MUST BE SYNCHRONIZED!
+        Tolerance: ±10μs maximum
+        
+        If out of phase → No levitation!
+
+
+                    TESTING CHECKLIST
+        ┌────────────────────────────────────────────────────┐
+        │ Before Power-On:                                   │
+        │ □ All 7 emitters connected correctly               │
+        │ □ All 7 MOSFETs oriented correctly                 │
+        │ □ All 7 pull-down resistors installed              │
+        │ □ Arduino VIN to 12V rail                          │
+        │ □ Arduino GND to GND rail                          │
+        │ □ Fuse installed in 12V line                       │
+        │ □ No shorts between 12V and GND                    │
+        │ □ Firmware uploaded successfully                   │
+        │                                                    │
+        │ After Power-On:                                    │
+        │ □ Faint ultrasonic whine audible                   │
+        │ □ All emitters flicker on phone camera             │
+        │ □ MOSFET temperature <50°C                         │
+        │ □ No burning smell                                 │
+        │ □ Foam bead levitates at 3-7mm                     │
+        └────────────────────────────────────────────────────┘
+
+
+        For detailed assembly instructions, see:
+        /builds/build-1-micro/ASSEMBLY_GUIDE.md
+        
+        For systematic testing procedure, see:
+        /builds/build-1-micro/TESTING_PROTOCOL.md
+        
+        For troubleshooting help, see:
+        /builds/build-1-micro/WIRING_DIAGRAM.md
+```
+
+**PRINT THIS DIAGRAM AND TAPE TO YOUR WORKBENCH!**
+
+Save as: `builds/build-1-micro/WIRING_DIAGRAM_VISUAL.txt`
