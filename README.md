@@ -95,6 +95,52 @@
 *Top row: Distance from trap center vs time. FoL particles reach <3mm within 300ms. Random particles never stabilize.  
 Bottom row: Velocity magnitude vs time. FoL shows rapid damping. Random shows persistent oscillation (instability).*
 
+### 🌸 Multi-Ring Scaling - 19-Emitter Array
+
+<p align="center">
+  <img src="simulations/results/19_emitter_comparison.png" alt="19-Emitter Array Comparison" width="900"/>
+</p>
+
+**Build 2 validated!** The 19-emitter multi-ring Flower of Life array (1 center + 6 inner + 12 outer) creates **18 simultaneous trap points** - enabling manipulation of multiple particles at once.
+
+#### Scaling Performance
+
+<p align="center">
+  <img src="simulations/results/multiple_trap_points.png" alt="Multiple Trap Points" width="900"/>
+</p>
+
+*Left: All 18 trap points visible across the full array. Right: 7 primary traps numbered in the central region. Gold star = center emitter, orange circles = inner ring, red circles = outer ring.*
+
+<p align="center">
+  <img src="simulations/results/scaling_analysis.png" alt="Scaling Analysis" width="900"/>
+</p>
+
+**Key findings:**
+- **18 vs 14 trap points** - FoL creates 29% more simultaneous traps than 19-emitter square grid
+- **Efficiency maintained** - Well depth per emitter stays consistent from 7→19 emitters
+- **Distributed trapping** - FoL optimizes for multiple stable points vs single deep well
+- **Research-grade capability** - Multiple trap points enable advanced multi-particle manipulation
+
+### 📊 Literature Baseline Comparison
+
+<p align="center">
+  <img src="simulations/results/literature_comparison.png" alt="Literature Comparison" width="900"/>
+</p>
+
+**How does Flower of Life rank?** We compared against 3 established methods from published research:
+- **Marzo Holographic Array** (Nature Communications 2015) - State-of-the-art phased array
+- **Focused Bowl** (Acoustic Tweezers) - Biomedical standard for single-particle manipulation  
+- **Brandt Standing Wave** (Nature 2001) - Classic two-opposed-transducer setup
+
+<p align="center">
+  <img src="simulations/results/performance_metrics_comparison.png" alt="Performance Metrics" width="900"/>
+</p>
+
+*Bar charts comparing well depth, maximum force, mean force, and normalized multi-metric performance across all methods.*
+
+**Results:** Flower of Life achieves competitive performance with established academic methods while offering superior multi-trap capability and simpler hardware requirements.
+
+
 ---
 
 ## 📊 Quantitative Validation - The Numbers Don't Lie

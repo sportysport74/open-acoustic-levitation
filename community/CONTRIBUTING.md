@@ -1,197 +1,370 @@
 # Contributing to Open Acoustic Levitation
 
-**First off: THANK YOU.** This project only succeeds if people like you contribute.
+🌸 **Thank you for your interest in contributing!** This project thrives on community participation, and we welcome contributions from physicists, engineers, makers, and enthusiasts of all skill levels.
 
 ---
 
-## How You Can Help
+## 🎯 Ways to Contribute
 
-### 🔬 Build and Test
-**The most valuable contribution:**
-- Build one of the designs
-- Document what worked and what didn't
-- Share photos/videos
-- Report issues you encountered
+### 🛠️ Build & Share Your Array
 
-**Submit to:** `community/replications/`
+**The #1 most valuable contribution: Build your own levitator and share your results!**
 
----
+**What we're looking for:**
+- 📸 **Build photos** - Assembly process, finished array, creative enclosures
+- 🎬 **Levitation videos** - Particles floating, multiple traps, dynamic manipulation
+- 📊 **Experimental data** - Force measurements, particle trajectories, stability tests
+- 💡 **Design improvements** - Modifications that work better for specific use cases
+- 🐛 **Troubleshooting tips** - Solutions to common problems you encountered
 
-### 🐛 Report Issues
-Found a problem? Tell us!
+**How to share:**
+1. Post in [GitHub Discussions](https://github.com/sportysport74/open-acoustic-levitation/discussions) with photos/videos
+2. Open an Issue tagged `build-showcase`
+3. Submit a Pull Request adding your build to `/community/builds/`
+4. Tag `#OpenAcousticLevitation` on social media
 
-**Before reporting:**
-1. Check if someone else already reported it
-2. Try to reproduce the issue
-3. Gather details (what you tried, what happened, what should have happened)
-
-**Use GitHub Issues** with these labels:
-- `bug` - Something doesn't work
-- `documentation` - Unclear or wrong docs
-- `enhancement` - Idea for improvement
-- `question` - Need help understanding something
+**Community Hall of Fame:** Outstanding builds will be featured in README!
 
 ---
 
-### 💡 Improve Designs
-Made it better? Share!
+### 🔬 Scientific Contributions
 
-**Good contributions:**
-- More efficient geometries
-- Cheaper component alternatives
-- Better control algorithms
-- Safety improvements
-- New applications
+**Validate, extend, or challenge the simulations**
 
-**Submit via Pull Request** with clear description of what changed and why.
+**Research areas:**
+- Experimental validation of simulation predictions
+- Alternative geometry comparisons
+- Parametric pumping implementations
+- Multi-particle dynamics
+- Acoustic streaming effects
+- Non-spherical particle levitation
+
+**How to contribute:**
+1. Run simulations with different parameters
+2. Document your methodology
+3. Share results with analysis
+4. Open a Pull Request with new simulation scripts
+
+**Publishing:** If your contribution is substantial, we'll collaborate on academic papers!
 
 ---
 
-### 📚 Improve Documentation
-**We need help with:**
-- Clearer explanations
-- Better diagrams
-- Video tutorials
+### 💻 Code Contributions
+
+**Improve simulations, add features, fix bugs**
+
+**High-impact areas:**
+- Interactive web visualizations (WebGL, Three.js)
+- Real-time control software (Python GUI, LabVIEW)
+- Machine learning for trap optimization
+- CAD model improvements (FreeCAD, Fusion 360)
+- Hardware firmware enhancements
+- Documentation improvements
+
+**Process:**
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes with clear commit messages
+4. Test thoroughly
+5. Submit a Pull Request with description of changes
+
+---
+
+### 📐 Hardware Design Contributions
+
+**Expand the hardware ecosystem**
+
+**What we need:**
+- **Build 2 CAD models** (19-emitter mounting plate)
+- **Build 3 CAD models** (37-emitter professional array)
+- **Alternative enclosures** (acrylic, aluminum, wood)
+- **PCB designs** (custom driver boards)
+- **Power supply designs** (switching regulators, amplifiers)
+- **Sensor integration** (microphones, cameras, force sensors)
+
+**Formats accepted:**
+- OpenSCAD (.scad)
+- FreeCAD (.fcstd)
+- Fusion 360 (.f3d)
+- STL for 3D printing (.stl)
+- DXF for laser cutting (.dxf)
+- KiCAD for PCBs (.kicad_pro)
+
+**Submit via Pull Request to `/builds/` with:**
+- CAD source files
+- Exported STL/DXF files
+- Assembly instructions
+- Bill of materials
+- Photos of assembled hardware (if available)
+
+---
+
+### 📚 Documentation Contributions
+
+**Make the project more accessible**
+
+**Documentation needs:**
+- Tutorials for beginners
+- Troubleshooting guides
+- Theory explanations (simplified for non-physicists)
+- Video walkthroughs
 - Translations to other languages
-- Beginner-friendly guides
+- FAQ expansions
 
-**Even fixing typos helps.**
-
----
-
-### 🎓 Academic Validation
-Researchers: Please replicate and publish!
-
-**We encourage:**
-- Independent verification
-- Peer-reviewed papers
-- University research projects
-- Student theses
-
-**Please cite this repository** and share your papers with the community.
+**Style guide:**
+- Use clear, concise language
+- Include visual aids (diagrams, photos)
+- Provide examples and real-world context
+- Link to relevant theory documents
 
 ---
 
-## Pull Request Process
+### 🐛 Bug Reports & Feature Requests
 
-1. **Fork** the repository
-2. **Create a branch** for your changes (`git checkout -b feature/improvement-name`)
-3. **Make your changes** with clear commit messages
-4. **Test** if applicable
-5. **Update documentation** if you changed functionality
-6. **Submit Pull Request** with description of changes
+**Help us improve**
 
-**We review PRs within 1 week** (usually faster)
+**Reporting bugs:**
+1. Check if issue already exists
+2. Use descriptive title
+3. Include:
+   - Operating system
+   - Python version
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Error messages (full traceback)
+   - Screenshots if relevant
+
+**Requesting features:**
+1. Describe use case clearly
+2. Explain why it's valuable
+3. Suggest implementation approach (optional)
+4. Link to relevant papers/resources
+
+**Use issue templates:** We provide templates for bugs and features
 
 ---
 
-## Code Standards
+## 🎨 Community Guidelines
 
-### For Arduino/C++
-- Use clear variable names
-- Comment complex sections
-- Follow existing style in the codebase
-- Test on real hardware if possible
+### Be Respectful & Inclusive
 
-### For Python
+- Welcome contributors of all backgrounds and skill levels
+- Use inclusive language
+- Provide constructive feedback
+- Celebrate successes together
+- Help newcomers get started
+
+### Scientific Integrity
+
+- Cite sources properly
+- Be honest about limitations
+- Share negative results (failed experiments teach us!)
+- Acknowledge uncertainty
+- Don't make claims beyond what data supports
+
+### Open Source Spirit
+
+- Share knowledge freely
+- Give credit generously
+- Help others succeed
+- Document your work
+- Pay it forward
+
+---
+
+## 🚀 Getting Started
+
+### First-Time Contributors
+
+**Easy starter tasks:**
+1. Fix typos in documentation
+2. Add comments to code
+3. Improve README formatting
+4. Test installation instructions
+5. Share your build photos
+
+**Look for issues tagged:** `good-first-issue` or `help-wanted`
+
+### Development Setup
+
+```bash
+# Clone repository
+git clone https://github.com/sportysport74/open-acoustic-levitation.git
+cd open-acoustic-levitation
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run tests (if available)
+python -m pytest
+
+# Run simulations
+cd simulations
+python gor_kov_simulation.py
+```
+
+### Code Style
+
+**Python:**
 - PEP 8 style guide
-- Type hints where reasonable
+- Descriptive variable names
 - Docstrings for functions
-- Keep dependencies minimal
+- Type hints encouraged
+- Comments for complex logic
 
-### For FPGA (Verilog/VHDL)
-- Comment signal purposes
-- Use meaningful module names
-- Include simulation testbenches
-- Document timing constraints
-
----
-
-## Documentation Standards
-
-### Markdown Files
-- Use clear headers
-- Include code blocks with syntax highlighting
-- Add images/diagrams where helpful
-- Keep paragraphs short and scannable
-
-### Build Guides
-- Step-by-step numbered lists
-- Photo/diagram for each step
-- Highlight safety warnings
-- List required tools upfront
-- Include troubleshooting section
+**OpenSCAD:**
+- Parametric designs
+- Clear module names
+- Comments explaining geometry
+- Print instructions included
 
 ---
 
-## What We WON'T Accept
+## 📝 Pull Request Process
 
-**Hard nos:**
-- Proprietary/closed-source contributions
-- Patenting of designs from this repo
-- Plagiarism or uncredited work
-- Unsafe designs without clear warnings
-- Deliberately misleading information
+1. **Update documentation** - If you change functionality, update relevant docs
+2. **Test thoroughly** - Ensure code runs without errors
+3. **One feature per PR** - Keep changes focused
+4. **Descriptive title** - Clearly state what the PR does
+5. **Explain changes** - Provide context in PR description
+6. **Reference issues** - Link related issues (Closes #123)
+7. **Be patient** - Reviews may take a few days
 
-**Use common sense and good faith.**
+### PR Checklist
 
----
-
-## Recognition
-
-**All contributors are credited in:**
-- The main README
-- Release notes
-- `community/contributors.md`
-
-**Significant contributions** (major features, comprehensive testing, etc.) may earn you:
-- Co-author status on academic papers
-- Invitation to core maintainer team
-- Consulting opportunities if commercial projects emerge
+- [ ] Code follows style guidelines
+- [ ] Documentation updated
+- [ ] Changes tested locally
+- [ ] Commit messages are clear
+- [ ] No merge conflicts
+- [ ] Screenshots included (for visual changes)
 
 ---
 
-## Communication
+## 🏆 Recognition
 
-**Be excellent to each other.**
+### Ways We Thank Contributors
 
-We're building something that could change the world. That requires:
-- ✅ Respect for all skill levels (experts and beginners both welcome)
-- ✅ Constructive criticism (focus on ideas, not people)
-- ✅ Collaboration over competition
-- ✅ Celebrating successes together
+**All contributors:**
+- Listed in Contributors section
+- Mentioned in release notes
+- Acknowledged in academic papers (if substantial)
 
-**Not tolerated:**
-- ❌ Personal attacks
-- ❌ Discrimination of any kind
-- ❌ Spam or self-promotion
-- ❌ Deliberate sabotage or misinformation
+**Outstanding contributions:**
+- Featured in README showcase
+- Invited to co-author publications
+- Promoted on social media
+- Recognized in documentation
 
----
-
-## Questions?
-
-- **Technical questions:** Open a GitHub Issue
-- **General discussion:** [Discord server] (coming soon)
-- **Private inquiries:** [Contact info]
+**Build showcase winners:**
+- Featured photo on main README
+- Detailed writeup in `/community/builds/`
+- Social media spotlight
+- Priority support for future projects
 
 ---
 
-## The Big Picture
+## 📧 Communication Channels
 
-Every contribution, no matter how small, moves this project forward.
+**GitHub Discussions** (primary)
+- Q&A
+- Build showcases
+- Feature discussions
+- Community meetups
 
-A typo fix makes the docs clearer.
-A successful build validates the design.
-An improvement makes it accessible to more people.
-A translation reaches a new community.
+**GitHub Issues**
+- Bug reports
+- Feature requests
+- Technical problems
 
-**You're part of making levitation technology free for humanity.**
-
-That's pretty fucking cool.
-
-Thank you for contributing.
+**Social Media**
+- Twitter/X: `#OpenAcousticLevitation`
+- Reddit: r/AcousticLevitation
+- Discord: (coming soon!)
 
 ---
 
-*This guide will evolve as the community grows. Suggestions for improvement welcome!*
+## 🔒 Safety First
+
+**All contributions must prioritize safety:**
+- Include safety warnings where appropriate
+- Don't encourage unsafe modifications
+- Document potential hazards
+- Provide protective equipment recommendations
+
+**See [SAFETY.md](docs/safety.md) for full guidelines**
+
+---
+
+## 📜 License
+
+By contributing, you agree that your contributions will be licensed under the MIT License.
+
+This means:
+- Anyone can use your contribution freely
+- You retain copyright to your work
+- No warranty is implied
+- Credit is given where due
+
+---
+
+## 🎓 Academic Collaboration
+
+**Interested in publishing together?**
+
+We're preparing manuscripts for submission to:
+- Applied Physics Letters
+- Journal of the Acoustical Society of America
+- Scientific Reports
+
+**Major contributors may be invited as co-authors.** Criteria:
+- Substantial intellectual contribution
+- Original research or analysis
+- Experimental validation
+- Novel theoretical insights
+
+**Contact via GitHub Issues with tag:** `academic-collaboration`
+
+---
+
+## 🌟 Special Thanks
+
+To everyone who has contributed so far - this project wouldn't exist without you!
+
+**Top contributors will be listed here as the project grows.**
+
+---
+
+## 🎯 Current Priority Needs
+
+**Updated: December 2025**
+
+**Most wanted contributions right now:**
+1. 🎬 **First levitation video!** - Be the first to capture real levitation
+2. 📐 **Build 2 CAD models** - 19-emitter mounting plate design
+3. 🔬 **Experimental validation** - Measure actual forces vs predictions
+4. 💡 **Arduino firmware improvements** - Real-time frequency tuning
+5. 🌐 **Interactive web demo** - Browser-based simulation
+6. 📹 **Tutorial videos** - Assembly walkthroughs
+7. 🔊 **Acoustic pressure measurements** - Validate SPL predictions
+8. 📊 **Parametric pumping** - Implement time-varying modulation
+
+**See [current issues](https://github.com/sportysport74/open-acoustic-levitation/issues) for more**
+
+---
+
+## ❓ Questions?
+
+**Not sure where to start?**
+- Read the [README](README.md) for project overview
+- Check [FAQ](docs/faq.md) for common questions
+- Browse [existing discussions](https://github.com/sportysport74/open-acoustic-levitation/discussions)
+- Open an issue asking for guidance - we're friendly!
+
+---
+
+**🌸 Thank you for helping democratize acoustic levitation technology! Together, we're making breakthrough science accessible to everyone. 🌸**
+
+---
+
+*Last updated: December 19, 2025*
