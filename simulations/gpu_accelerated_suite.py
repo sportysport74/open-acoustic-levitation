@@ -74,12 +74,16 @@ def flower_of_life_gpu(n_rings=1):
     positions = []
     
     # Center
-    positions.append([0, 0, 0])
+    positions.append([
+        torch.tensor(0.0, device=device),
+        torch.tensor(0.0, device=device),
+        torch.tensor(0.0, device=device)
+    ])
     
     # Ring 1 (6 emitters at 2.5λ)
     r1 = 2.5 * WAVELENGTH
     for i in range(6):
-        theta = i * torch.pi / 3
+        theta = torch.tensor(i * np.pi / 3, device=device)
         positions.append([
             r1 * torch.cos(theta),
             r1 * torch.sin(theta),
@@ -90,7 +94,7 @@ def flower_of_life_gpu(n_rings=1):
         # Ring 2 (12 emitters at 5.0λ)
         r2 = 5.0 * WAVELENGTH
         for i in range(12):
-            theta = i * torch.pi / 6
+            theta = torch.tensor(i * np.pi / 6, device=device)
             positions.append([
                 r2 * torch.cos(theta),
                 r2 * torch.sin(theta),
@@ -101,7 +105,7 @@ def flower_of_life_gpu(n_rings=1):
         # Ring 3 (18 emitters at 7.5λ)
         r3 = 7.5 * WAVELENGTH
         for i in range(18):
-            theta = i * torch.pi / 9
+            theta = torch.tensor(i * np.pi / 9, device=device)
             positions.append([
                 r3 * torch.cos(theta),
                 r3 * torch.sin(theta),
@@ -402,9 +406,9 @@ def gpu_ultra_high_res_37emitter(grid_size=400):
     
     ax.set_xlabel('X Position (mm)', fontweight='bold', fontsize=13)
     ax.set_ylabel('Y Position (mm)', fontweight='bold', fontsize=13)
-    ax.set_title(f'37-Emitter Flower of Life @ {grid_size}×{grid_size} Resolution\\n'\n",
-    "                f'Calculated in {calc_time:.1f}s on {gpu_name}',\n",
-    "                fontweight='bold', fontsize=15)
+    ax.set_title(f'37-Emitter Flower of Life @ {grid_size}×{grid_size} Resolution\n'
+                f'Calculated in {calc_time:.1f}s on {gpu_name}',
+                fontweight='bold', fontsize=15)
     ax.grid(True, alpha=0.2)
     ax.legend(fontsize=11)
     
