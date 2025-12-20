@@ -2,3 +2,57 @@
 numpy>=1.20.0
 matplotlib>=3.3.0
 scipy>=1.7.0
+
+# Open Acoustic Levitation - Python Requirements
+# ================================================
+# 
+# Installation Instructions:
+# ==========================
+# 
+# BASIC INSTALL (CPU-only simulations):
+#   pip install -r requirements.txt
+# 
+# GPU INSTALL (for RTX 5090/4090/3090 with CUDA 13.x):
+#   1. Verify CUDA installed: nvcc --version
+#   2. Install PyTorch nightly with CUDA:
+#      pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu130
+#   3. Install other requirements:
+#      pip install -r requirements.txt
+# 
+# FOR OLDER GPUs (CUDA 12.1):
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+#   pip install -r requirements.txt
+#
+# ==========================
+
+# Core scientific computing
+numpy>=1.25.2,<2.6
+scipy>=1.10.0
+matplotlib>=3.7.0
+
+# PyTorch (CPU version - see above for GPU)
+# Uncomment ONE of these based on your setup:
+
+# Option 1: CPU-only (works everywhere, slower)
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Option 2: GPU with CUDA 13.x (RTX 5090/50-series - requires manual install, see above)
+# torch @ https://download.pytorch.org/whl/nightly/cu130/torch-2.11.0.dev20251219%2Bcu130-cp311-cp311-linux_x86_64.whl
+# (Install manually - see instructions above)
+
+# Option 3: GPU with CUDA 12.1 (RTX 4090/40-series, 3090/30-series)
+# torch @ https://download.pytorch.org/whl/cu121/torch-2.9.1%2Bcu121-cp311-cp311-linux_x86_64.whl
+# (Install manually - see instructions above)
+
+# Jupyter notebook support (optional, for interactive_simulation.ipynb)
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+notebook>=7.0.0
+
+# Progress bars
+tqdm>=4.65.0
+
+# Additional utilities
+Pillow>=10.0.0
