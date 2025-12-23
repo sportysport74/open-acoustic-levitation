@@ -1,0 +1,1239 @@
+{
+  "timestamp": "2025-12-22T18:42:03.286624",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "n_emitters": 19,
+  "frequency": 40000.0,
+  "constraints": {
+    "transducer_diameter_mm": 10.0,
+    "min_spacing_mm": 12.0,
+    "max_perturbation_mm": 5.0
+  },
+  "perfect_fol": {
+    "positions": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.021437499672174454,
+        0.0
+      ],
+      [
+        0.010718749836087227,
+        0.01856542006134987
+      ],
+      [
+        -0.010718749836087227,
+        0.01856542006134987
+      ],
+      [
+        -0.021437499672174454,
+        2.625336640598617e-18
+      ],
+      [
+        -0.010718749836087227,
+        -0.01856542006134987
+      ],
+      [
+        0.010718749836087227,
+        -0.01856542006134987
+      ],
+      [
+        0.04287499934434891,
+        0.0
+      ],
+      [
+        0.03713084012269974,
+        0.021437499672174454
+      ],
+      [
+        0.021437499672174454,
+        0.03713084012269974
+      ],
+      [
+        2.625336640598617e-18,
+        0.04287499934434891
+      ],
+      [
+        -0.021437499672174454,
+        0.03713084012269974
+      ],
+      [
+        -0.03713084012269974,
+        0.021437499672174454
+      ],
+      [
+        -0.04287499934434891,
+        5.250673281197234e-18
+      ],
+      [
+        -0.03713084012269974,
+        -0.021437499672174454
+      ],
+      [
+        -0.021437499672174454,
+        -0.03713084012269974
+      ],
+      [
+        -7.876010128591004e-18,
+        -0.04287499934434891
+      ],
+      [
+        0.021437499672174454,
+        -0.03713084012269974
+      ],
+      [
+        0.03713084012269974,
+        -0.021437499672174454
+      ]
+    ]
+  },
+  "optimized": {
+    "positions": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.021437499672174454,
+        0.0
+      ],
+      [
+        0.010718749836087227,
+        0.01856542006134987
+      ],
+      [
+        -0.010718749836087227,
+        0.01856542006134987
+      ],
+      [
+        -0.021437499672174454,
+        2.625336640598617e-18
+      ],
+      [
+        -0.010718749836087227,
+        -0.01856542006134987
+      ],
+      [
+        0.010718749836087227,
+        -0.01856542006134987
+      ],
+      [
+        0.04287499934434891,
+        0.0
+      ],
+      [
+        0.03713084012269974,
+        0.021437499672174454
+      ],
+      [
+        0.021437499672174454,
+        0.03713084012269974
+      ],
+      [
+        2.625336640598617e-18,
+        0.04287499934434891
+      ],
+      [
+        -0.021437499672174454,
+        0.03713084012269974
+      ],
+      [
+        -0.03713084012269974,
+        0.021437499672174454
+      ],
+      [
+        -0.04287499934434891,
+        5.250673281197234e-18
+      ],
+      [
+        -0.03713084012269974,
+        -0.021437499672174454
+      ],
+      [
+        -0.021437499672174454,
+        -0.03713084012269974
+      ],
+      [
+        -7.876010128591004e-18,
+        -0.04287499934434891
+      ],
+      [
+        0.021437499672174454,
+        -0.03713084012269974
+      ],
+      [
+        0.03713084012269974,
+        -0.021437499672174454
+      ]
+    ],
+    "metrics": {
+      "well_depth": 0.008204667828977108,
+      "symmetry": 821.5287710339583,
+      "uniformity": 4705.537669493489,
+      "total_score": 1300287.2058122843
+    },
+    "min_distance_mm": 21.437499672174454,
+    "max_deviation_mm": 0.0,
+    "valid": true
+  },
+  "history": [
+    {
+      "iteration": 0,
+      "score": 1042100.6018348149,
+      "well_depth": 0.010932349599897861,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 1,
+      "score": NaN,
+      "well_depth": 0.01120033673942089,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 2,
+      "score": NaN,
+      "well_depth": 0.011371662840247154,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 3,
+      "score": NaN,
+      "well_depth": 0.011464600451290607,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 4,
+      "score": NaN,
+      "well_depth": 0.011516440659761429,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 5,
+      "score": NaN,
+      "well_depth": 0.011547486297786236,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 6,
+      "score": NaN,
+      "well_depth": 0.011567396111786366,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 7,
+      "score": NaN,
+      "well_depth": 0.011580882593989372,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 8,
+      "score": NaN,
+      "well_depth": 0.011590377427637577,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 9,
+      "score": NaN,
+      "well_depth": 0.01159721426665783,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 10,
+      "score": NaN,
+      "well_depth": 0.01160223688930273,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 11,
+      "score": NaN,
+      "well_depth": 0.011605925858020782,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 12,
+      "score": NaN,
+      "well_depth": 0.011608639732003212,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 13,
+      "score": NaN,
+      "well_depth": 0.0116106066852808,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 14,
+      "score": NaN,
+      "well_depth": 0.011611987836658955,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 15,
+      "score": NaN,
+      "well_depth": 0.011612912639975548,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 16,
+      "score": NaN,
+      "well_depth": 0.011613478884100914,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 17,
+      "score": NaN,
+      "well_depth": 0.011613719165325165,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 18,
+      "score": NaN,
+      "well_depth": 0.011613735929131508,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 19,
+      "score": NaN,
+      "well_depth": 0.011613542214035988,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 20,
+      "score": NaN,
+      "well_depth": 0.01161318551748991,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 21,
+      "score": NaN,
+      "well_depth": 0.011612676084041595,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 22,
+      "score": NaN,
+      "well_depth": 0.011612052097916603,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 23,
+      "score": NaN,
+      "well_depth": 0.011611358262598515,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 24,
+      "score": NaN,
+      "well_depth": 0.011610576882958412,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 25,
+      "score": NaN,
+      "well_depth": 0.011609729379415512,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 26,
+      "score": NaN,
+      "well_depth": 0.01160882506519556,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 27,
+      "score": NaN,
+      "well_depth": 0.011607867665588856,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 28,
+      "score": NaN,
+      "well_depth": 0.01160687766969204,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 29,
+      "score": NaN,
+      "well_depth": 0.011605854146182537,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 30,
+      "score": NaN,
+      "well_depth": 0.011604806408286095,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 31,
+      "score": NaN,
+      "well_depth": 0.011603754945099354,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 32,
+      "score": NaN,
+      "well_depth": 0.011602677404880524,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 33,
+      "score": NaN,
+      "well_depth": 0.011601593345403671,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 34,
+      "score": NaN,
+      "well_depth": 0.011600508354604244,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 35,
+      "score": NaN,
+      "well_depth": 0.011599423363804817,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 36,
+      "score": NaN,
+      "well_depth": 0.011598345823585987,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 37,
+      "score": NaN,
+      "well_depth": 0.011597259901463985,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 38,
+      "score": NaN,
+      "well_depth": 0.01159618515521288,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 39,
+      "score": NaN,
+      "well_depth": 0.011595123447477818,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 40,
+      "score": NaN,
+      "well_depth": 0.011594079434871674,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 41,
+      "score": NaN,
+      "well_depth": 0.011593038216233253,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 42,
+      "score": NaN,
+      "well_depth": 0.011592005379498005,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 43,
+      "score": NaN,
+      "well_depth": 0.011590992100536823,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 44,
+      "score": NaN,
+      "well_depth": 0.011589990928769112,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 45,
+      "score": NaN,
+      "well_depth": 0.011589004658162594,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 46,
+      "score": NaN,
+      "well_depth": 0.011588036082684994,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 47,
+      "score": NaN,
+      "well_depth": 0.011587069369852543,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 48,
+      "score": NaN,
+      "well_depth": 0.011586126871407032,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 49,
+      "score": NaN,
+      "well_depth": 0.011585199274122715,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 50,
+      "score": NaN,
+      "well_depth": 0.011584287509322166,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 51,
+      "score": NaN,
+      "well_depth": 0.011583401821553707,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 52,
+      "score": NaN,
+      "well_depth": 0.011582516133785248,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 53,
+      "score": NaN,
+      "well_depth": 0.011581658385694027,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 54,
+      "score": NaN,
+      "well_depth": 0.011580814607441425,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 55,
+      "score": NaN,
+      "well_depth": 0.011579974554479122,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 56,
+      "score": NaN,
+      "well_depth": 0.011579162441194057,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 57,
+      "score": NaN,
+      "well_depth": 0.011578361503779888,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 58,
+      "score": NaN,
+      "well_depth": 0.011577572673559189,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 59,
+      "score": NaN,
+      "well_depth": 0.011576800607144833,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 60,
+      "score": NaN,
+      "well_depth": 0.011576048098504543,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 61,
+      "score": NaN,
+      "well_depth": 0.011575297452509403,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 62,
+      "score": NaN,
+      "well_depth": 0.011574575677514076,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 63,
+      "score": NaN,
+      "well_depth": 0.011573869735002518,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 64,
+      "score": NaN,
+      "well_depth": 0.011573178693652153,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 65,
+      "score": NaN,
+      "well_depth": 0.01157248392701149,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 66,
+      "score": NaN,
+      "well_depth": 0.011571807786822319,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 67,
+      "score": NaN,
+      "well_depth": 0.011571143753826618,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 68,
+      "score": NaN,
+      "well_depth": 0.011570509523153305,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 69,
+      "score": NaN,
+      "well_depth": 0.01156986691057682,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 70,
+      "score": NaN,
+      "well_depth": 0.011569247581064701,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 71,
+      "score": NaN,
+      "well_depth": 0.011568638496100903,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 72,
+      "score": NaN,
+      "well_depth": 0.011568025685846806,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 73,
+      "score": NaN,
+      "well_depth": 0.011567443609237671,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 74,
+      "score": NaN,
+      "well_depth": 0.011566867120563984,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 75,
+      "score": NaN,
+      "well_depth": 0.011566303670406342,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 76,
+      "score": NaN,
+      "well_depth": 0.0115657402202487,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 77,
+      "score": NaN,
+      "well_depth": 0.011565196327865124,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 78,
+      "score": NaN,
+      "well_depth": 0.011564664542675018,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 79,
+      "score": NaN,
+      "well_depth": 0.011564129032194614,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 80,
+      "score": NaN,
+      "well_depth": 0.01156361773610115,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 81,
+      "score": NaN,
+      "well_depth": 0.011563103646039963,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 82,
+      "score": NaN,
+      "well_depth": 0.01156260259449482,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 83,
+      "score": NaN,
+      "well_depth": 0.011562108062207699,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 84,
+      "score": NaN,
+      "well_depth": 0.01156163215637207,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 85,
+      "score": NaN,
+      "well_depth": 0.011561158113181591,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 86,
+      "score": NaN,
+      "well_depth": 0.011560695245862007,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 87,
+      "score": NaN,
+      "well_depth": 0.011560238897800446,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 88,
+      "score": NaN,
+      "well_depth": 0.011559792794287205,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 89,
+      "score": NaN,
+      "well_depth": 0.011559355072677135,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 90,
+      "score": NaN,
+      "well_depth": 0.011558921076357365,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 91,
+      "score": NaN,
+      "well_depth": 0.01155849453061819,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 92,
+      "score": NaN,
+      "well_depth": 0.011558078229427338,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 93,
+      "score": NaN,
+      "well_depth": 0.01155766099691391,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 94,
+      "score": NaN,
+      "well_depth": 0.011557257734239101,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 95,
+      "score": NaN,
+      "well_depth": 0.01155686005949974,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 96,
+      "score": NaN,
+      "well_depth": 0.011556463316082954,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 97,
+      "score": NaN,
+      "well_depth": 0.011556077748537064,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 98,
+      "score": NaN,
+      "well_depth": 0.011555691249668598,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 99,
+      "score": NaN,
+      "well_depth": 0.011555319651961327,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 100,
+      "score": NaN,
+      "well_depth": 0.011554942466318607,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 101,
+      "score": NaN,
+      "well_depth": 0.011554582975804806,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 102,
+      "score": NaN,
+      "well_depth": 0.011554217897355556,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 103,
+      "score": NaN,
+      "well_depth": 0.011553863994777203,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 104,
+      "score": NaN,
+      "well_depth": 0.011553511023521423,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 105,
+      "score": NaN,
+      "well_depth": 0.011553171090781689,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 106,
+      "score": NaN,
+      "well_depth": 0.01155283022671938,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 107,
+      "score": NaN,
+      "well_depth": 0.011552494019269943,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 108,
+      "score": NaN,
+      "well_depth": 0.011552155949175358,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 109,
+      "score": NaN,
+      "well_depth": 0.011551834642887115,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 110,
+      "score": NaN,
+      "well_depth": 0.011551513336598873,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 111,
+      "score": NaN,
+      "well_depth": 0.011551191098988056,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 112,
+      "score": NaN,
+      "well_depth": 0.011550872586667538,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 113,
+      "score": NaN,
+      "well_depth": 0.011550555005669594,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 114,
+      "score": NaN,
+      "well_depth": 0.011550262570381165,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 115,
+      "score": NaN,
+      "well_depth": 0.01154996082186699,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 116,
+      "score": NaN,
+      "well_depth": 0.011549660004675388,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 117,
+      "score": NaN,
+      "well_depth": 0.011549358256161213,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 118,
+      "score": NaN,
+      "well_depth": 0.011549080722033978,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 119,
+      "score": NaN,
+      "well_depth": 0.011548792012035847,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 120,
+      "score": NaN,
+      "well_depth": 0.011548505164682865,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 121,
+      "score": NaN,
+      "well_depth": 0.011548221111297607,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 122,
+      "score": NaN,
+      "well_depth": 0.011547941714525223,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 123,
+      "score": NaN,
+      "well_depth": 0.011547674424946308,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 124,
+      "score": NaN,
+      "well_depth": 0.011547401547431946,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 125,
+      "score": NaN,
+      "well_depth": 0.011547135189175606,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 126,
+      "score": NaN,
+      "well_depth": 0.01154687162488699,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 127,
+      "score": NaN,
+      "well_depth": 0.011546604335308075,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 128,
+      "score": NaN,
+      "well_depth": 0.0115463612601161,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 129,
+      "score": NaN,
+      "well_depth": 0.011546104215085506,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 130,
+      "score": NaN,
+      "well_depth": 0.011545843444764614,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 131,
+      "score": NaN,
+      "well_depth": 0.011545603163540363,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 132,
+      "score": NaN,
+      "well_depth": 0.011545347981154919,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 133,
+      "score": NaN,
+      "well_depth": 0.011545100249350071,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 134,
+      "score": NaN,
+      "well_depth": 0.01154485996812582,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 135,
+      "score": NaN,
+      "well_depth": 0.011544623412191868,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 136,
+      "score": NaN,
+      "well_depth": 0.011544380336999893,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 137,
+      "score": NaN,
+      "well_depth": 0.01154415588825941,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 138,
+      "score": NaN,
+      "well_depth": 0.01154391746968031,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 139,
+      "score": NaN,
+      "well_depth": 0.011543689295649529,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 140,
+      "score": NaN,
+      "well_depth": 0.011543468572199345,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 141,
+      "score": NaN,
+      "well_depth": 0.011543243192136288,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 142,
+      "score": NaN,
+      "well_depth": 0.011543022468686104,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 143,
+      "score": NaN,
+      "well_depth": 0.01154280174523592,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 144,
+      "score": NaN,
+      "well_depth": 0.01154258381575346,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 145,
+      "score": NaN,
+      "well_depth": 0.011542366817593575,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 146,
+      "score": NaN,
+      "well_depth": 0.011542162857949734,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 147,
+      "score": NaN,
+      "well_depth": 0.011541946791112423,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 148,
+      "score": NaN,
+      "well_depth": 0.011541735380887985,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 149,
+      "score": NaN,
+      "well_depth": 0.011541523970663548,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    },
+    {
+      "iteration": 150,
+      "score": NaN,
+      "well_depth": 0.011541317217051983,
+      "valid": true,
+      "best_score": 1300287.2058122843
+    }
+  ]
+}
