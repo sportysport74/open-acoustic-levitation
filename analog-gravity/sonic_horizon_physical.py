@@ -66,15 +66,21 @@ class PhysicalSolver(AcousticMetricSolver):
 
 
 def advance(s, psi, pi, t, record_every=None, monitor=None):
+    """monitor(psi, pi) must return a 0-d tensor (no .item()): frames and monitor
+    values stay on the GPU during the loop and are transferred once at the end."""
     dt = s.stable_dt(); n = int(math.ceil(t / dt)); dt = t / n
     frames, times, mon = [], [], []
     for i in range(n + 1):
         if record_every and i % record_every == 0:
-            frames.append(psi.cpu().clone()); times.append(i * dt)
+            frames.append(psi.clone()); times.append(i * dt)
         if monitor:
-            mon.append((i * dt, monitor(psi, pi)))
+            mon.append(monitor(psi, pi))
         if i < n:
             psi, pi = s.step(psi, pi, dt)
+    if frames:
+        frames = list(torch.stack(frames).cpu())
+    if mon:
+        mon = list(zip((i * dt for i in range(n + 1)), torch.stack(mon).cpu().tolist()))
     return psi, pi, frames, times, mon
 
 
@@ -124,7 +130,7 @@ def main():
     g0 = eps * k
     ts_theory = 1.0 / (beta * eps * k * c)
     # inviscid Burgers: max gradient = g0 / (1 - t/t_s); reaches 5*g0 at t = 0.8 t_s
-    mon = lambda p, q: s.dx_(s.dx_(p)).abs().max().item()
+    mon = lambda p, q: s.dx_(s.dx_(p)).abs().max()
     psi, pi, _, _, hist = advance(s, psi, pi, 0.85 * ts_theory, monitor=mon)
     t5 = next((t for t, g in hist if g > 5 * g0), float("nan"))
     results.append(check("steepening time (gradient 5x)", abs(t5 / (0.8 * ts_theory) - 1) < 0.05,

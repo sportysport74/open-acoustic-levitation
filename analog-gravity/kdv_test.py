@@ -16,6 +16,28 @@ print(f"escape wavenumber (exact): k* = {math.sqrt(s_)/3e-4:.0f}   "
       f"other AI's estimate sqrt(v^2-c^2)/xi = {math.sqrt(1.4**2-1)/3e-4:.0f}   "
       f"measured in H test at t=0.55: ~{150*12.0:.0f}")
 
+def count_pulses(u, min_prom):
+    """Peaks of a periodic signal whose topographic prominence exceeds min_prom.
+    Grid-scale wiggles on a shock front are local maxima with tiny prominence,
+    so they are not counted; a real pulse (e.g. a soliton) stands out by ~its amplitude."""
+    n = len(u); count = 0
+    for i in range(n):
+        if not (u[i] > u[i - 1] and u[i] >= u[(i + 1) % n]):
+            continue
+        bases = []
+        for step in (-1, 1):  # walk each way until a higher point; lowest point passed is the base
+            j, lo = i, u[i]
+            for _ in range(n - 1):
+                j = (j + step) % n
+                if u[j] > u[i]:
+                    break
+                lo = min(lo, u[j])
+            bases.append(lo)
+        if u[i] - max(bases) > min_prom:
+            count += 1
+    return count
+
+
 N, L, c = 1024, 1.0, 1.0
 x = torch.arange(N, device=DEV, dtype=DT_) / N
 beta, eps, m = 1.2, 0.014, 20; k = 2*math.pi*m
@@ -24,15 +46,14 @@ res = {}
 for xi in (0.0, 1e-3):
     s = PhysicalSolver(torch.zeros(N), L, c, xi=xi, beta=beta, nu=1e-5)
     psi = -(eps/k)*torch.cos(k*x); pi = -c*s.dx_(psi)
-    mon = lambda p, q: s.dx_(s.dx_(p)).abs().max().item()
+    mon = lambda p, q: s.dx_(s.dx_(p)).abs().max()
     psi, pi, fr, tm, hist = advance(s, psi, pi, 1.5*ts, record_every=50, monitor=mon)
     u = s.dx_(psi).cpu()
-    one = u[: N//m * 1]  # one original wavelength
-    peaks = int(((one > torch.roll(one, 1)) & (one > torch.roll(one, -1)) & (one > 0.3*eps)).sum())
+    peaks = count_pulses(u.tolist(), 0.3*eps) / m  # whole domain, per original wavelength
     g = [h[1] for h in hist]
     res[xi] = (u, hist, peaks)
     print(f"xi={xi:g}: max gradient {max(g)/(eps*k):.1f}x initial; "
-          f"pulses per original wavelength at t=1.5 t_s: {peaks}")
+          f"pulses per original wavelength at t=1.5 t_s: {peaks:g} (prominence > 0.3 u0)")
 
 fig, (a, b) = plt.subplots(1, 2, figsize=(12, 4.5))
 for xi, col, lab in ((0.0, "#c05621", "no dispersion: shock"), (1e-3, "#2b6cb0", "with dispersion ξ=1e-3")):

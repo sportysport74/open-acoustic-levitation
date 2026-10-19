@@ -69,22 +69,46 @@ fig.tight_layout()
 fig.savefig("fibonacci_tube.png", dpi=140)
 
 
-def gaps_list(T, thr=-20):
+MERGE_KHZ = 0.2   # pass-peaks narrower than this don't split a gap
+THRESHOLDS = (-10, -20, -30)
+
+
+def gaps_list(T, thr=-20, merge_khz=MERGE_KHZ):
+    """Blocked bands (T < thr) in kHz, as (lo, hi, touches_sweep_edge).
+    Bands separated by a pass-peak narrower than merge_khz are merged."""
     blocked = T < thr; bands = []; i = 0
     while i < len(T):
         if blocked[i]:
             j = i
             while j < len(T) and blocked[j]:
                 j += 1
-            bands.append((freqs[i] / 1e3, freqs[j - 1] / 1e3)); i = j
+            lo, hi = freqs[i] / 1e3, freqs[j - 1] / 1e3
+            edge = i == 0 or j == len(T)
+            if bands and lo - bands[-1][1] < merge_khz:
+                plo, _, pedge = bands.pop()
+                lo, edge = plo, edge or pedge
+            bands.append((lo, hi, edge)); i = j
         else:
             i += 1
     return bands
 
+
+def fmt_dB(x):
+    return "< -100 dB" if x < -100 else f"{x:6.1f} dB"
+
+
+print(f"blocked = transmission below threshold; gaps split by pass-peaks < {MERGE_KHZ} kHz wide are merged;\n"
+      f"bands touching the {freqs[0]/1e3:g}-{freqs[-1]/1e3:g} kHz sweep edge are listed but not counted")
 for name, T in (("periodic", Tp), ("fibonacci", Tf)):
     b = gaps_list(T)
-    print(f"{name:9s}: {len(b)} blocked bands (< -20 dB): " +
-          ", ".join(f"{x:.1f}-{y:.1f}" for x, y in b) + " kHz")
+    inner = [(x, y) for x, y, e in b if not e]
+    edge = [(x, y) for x, y, e in b if e]
+    print(f"{name:9s}: {len(inner)} gaps (< -20 dB): " +
+          (", ".join(f"{x:.1f}-{y:.1f}" for x, y in inner) or "none") + " kHz" +
+          ("   [edge, not counted: " + ", ".join(f"{x:.1f}-{y:.1f}" for x, y in edge) + " kHz]" if edge else ""))
     for h in (5, 10, 15):
-        print(f"           at {h} kHz: {np.interp(h*1e3, freqs, T):6.1f} dB")
+        print(f"           at {h} kHz: {fmt_dB(np.interp(h*1e3, freqs, T))}")
+print("gap count vs threshold: " + "".join(f"{t:>8d} dB" for t in THRESHOLDS))
+for name, T in (("periodic", Tp), ("fibonacci", Tf)):
+    print(f"  {name:21s}" + "".join(f"{sum(not e for *_, e in gaps_list(T, t)):11d}" for t in THRESHOLDS))
 print("saved fibonacci_tube.png")

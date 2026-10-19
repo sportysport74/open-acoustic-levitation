@@ -121,10 +121,12 @@ def run(solver, psi, pi, t_end, record_every=None):
     frames, times = [], []
     for i in range(n + 1):
         if record_every and i % record_every == 0:
-            frames.append(psi.detach().cpu().clone())
+            frames.append(psi.detach().clone())  # stays on GPU: no sync in the loop
             times.append(i * dt)
         if i < n:
             psi, pi = solver.step(psi, pi, dt)
+    if frames:  # one GPU->CPU transfer at the end
+        frames = list(torch.stack(frames).cpu())
     return psi, pi, frames, times
 
 
