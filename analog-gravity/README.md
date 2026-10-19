@@ -23,6 +23,7 @@ python sonic_horizon_physical.py   # phase 2: dispersion, shocks, viscosity
 python kdv_test.py                 # shock vs dispersion
 python resonator_tube_design.py    # bench-build feasibility numbers
 python fibonacci_tube.py           # golden-ratio quasicrystal tube
+python tube_shock.py               # does the resonator tube stop the shock? (~15 min, CPU)
 ```
 
 ---
@@ -110,6 +111,70 @@ quasicrystal needs a finer analysis (more rings, gap widths vs. generation).
 Open question: does it suppress shock formation differently from the periodic tube?
 
 ![](results/fibonacci_tube.png)
+
+## 6. Does the resonator tube stop the shock? — `tube_shock.py`
+
+Time-domain answer to section 5's open question. Same plane-wave duct + side-stub
+model as `fibonacci_tube.py`, now with Burgers-type steepening (β = 1.2) and wall
+loss. Forward and backward waves each steepen on their own; each ring is 6 closed
+quarter-wave stubs joined at a point (pressure continuous, volume flow conserved).
+Numerics: a lattice with dx = c·dt, so linear propagation is exact and every ring
+sits on a cell boundary (gap lengths within 0.4 µm); steepening is a Godunov
+sub-step. The comparison only runs if all validation checks pass.
+
+| Check | Test | Result |
+|---|---|---|
+| L1 | linear limit vs `fibonacci_tube.T_dB` (same loss), periodic + Fibonacci, 55 + 144 rings | \|T\| within 0.04–0.22 dB where T > −40 dB (limit 0.5); all −20 dB gap edges identical |
+| N1 | no stubs: gradient reaches 5× at 0.8 x_s, x_s = 1/(βεk) | 0.5179 m vs 0.5155 m (+0.5%, limit 5%) |
+| N2 | zero-area stubs at every ring must reproduce the plain tube | f, 2f, 3f within 0.02 dB |
+| C1 | grid convergence, dx vs 2 dx, periodic tube at 160 dB | f, 2f, 3f within 0.01 / 0.05 / 0.55 dB |
+
+**First N1 run failed:** the gradient reached 5× at 0.418 m, 19% early. The
+waveform itself matched the exact implicit Burgers solution to 0.07% rms, so the
+solver was right and the measurement wasn't: a one-cell finite difference turned
+~10⁻³ cell-scale jitter (from the Godunov flux switching at F = 0, i.e. right at
+the steepest point) into a spurious gradient. The gradient is now a centred
+difference over ±16 cells (0.56 mm, vs a 2.2 mm gradient scale at 5×); the 5%
+tolerance is unchanged and the measured gradient tracks 1/(1 − x/x_s) at every x.
+A second issue: with 2 transits of settling, the 2f/3f residues in the stub tubes
+still drifted by up to 8.5 dB (start-up ringing near the band edges); the runs now
+settle for 8 transits and the levels are steady to ≤ 0.13 dB.
+
+**Result** (5 kHz, 144 rings, 1.23 m; exit harmonic levels relative to f; SPL as
+peak amplitude, same convention as `resonator_tube_design.py`):
+
+| Input | x/x_s | Plain 2f / 3f | Periodic 2f / 3f | Fibonacci 2f / 3f |
+|---|---|---|---|---|
+| 150 dB | 0.61 | −12 / −21 dB | −77 / −92 dB | −74 / −96 dB |
+| 155 dB | 1.08 | −8 / −13 dB | −72 / −84 dB | −69 / −88 dB |
+| 160 dB | 1.92 | −7 / −10 dB (shocked) | −67 / −75 dB | −64 / −75 dB |
+
+- **Both resonator tubes stop the shock.** At 160 dB the plain tube's exit is a
+  sawtooth; both loaded tubes deliver a clean sine with harmonics ≥ 64 dB down.
+  3f is suppressed even though 15 kHz is in a pass band: it is generated mainly
+  from f + 2f, so blocking 2f starves it.
+- **Fibonacci spacing doesn't change the answer.** 2f = 10 kHz sits deep in a stop
+  band for both layouts; periodic is 1–2 dB better on 2f and passes 0.9 dB more
+  of the fundamental.
+- **Cost:** the rings' linear loss at 5 kHz takes ~4–5 dB off the fundamental at
+  150 dB. At 160 dB the plain tube loses energy in its shock, so the exit
+  fundamentals are close (154.7 vs 153.3 dB).
+
+**Caveats:**
+- 144 rings (1.23 m), not the 55-ring 47 cm tube of section 5: the 47 cm tube
+  never shocks at these levels (x_s ≥ 0.64 m even at 160 dB).
+- Stubs are linear (no steepening inside them); cross-modulation between forward
+  and backward waves is neglected.
+- Wall loss is frequency-independent, set to the Kirchhoff value at 10 kHz (duct
+  0.223 Np/m, stubs 0.743 Np/m). Real wall loss grows like √f, so this
+  over-damps f by ~1.4× and under-damps 3f by ~1.2×.
+- 1-D plane-wave model: no higher duct modes, no stub-mouth near-field beyond the
+  0.85 r end correction.
+- Runs on CPU (800 s); a lattice of ~35k cells is too small for the GPU to help
+  (see the performance note above).
+
+![](results/tube_shock.png)
+![](results/tube_shock_validation.png)
 
 ---
 
