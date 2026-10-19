@@ -38,6 +38,7 @@ python resonator_tube_design.py    # bench-build feasibility numbers
 python fibonacci_tube.py           # golden-ratio quasicrystal tube
 python tube_shock.py               # does the resonator tube stop the shock? (~1 min with numba)
 python fibonacci_sweep.py          # quasicrystal or not? generation sweep + random control
+python fibonacci_trace_map.py      # KKT trace map: critical scaling vs controls (~6 min)
 ```
 
 ---
@@ -291,11 +292,128 @@ So the part of the quasicrystal picture that the Fibonacci order specifically
 produces is **reproducible gaps at fixed frequencies that persist generation to
 generation**. More gaps and a shrinking passband with length happen with random
 order too and can't be credited to the Fibonacci sequence. The main 7–12 kHz gap
-comes from the stub resonance itself and is present in every layout. Not tested:
-whether the gap positions and widths scale self-similarly (e.g. by φ) between
-generations.
+comes from the stub resonance itself and is present in every layout. Whether the
+spectrum scales like a quasicrystal's is tested properly in section 8.
 
 ![](results/fibonacci_sweep.png)
+
+## 8. Trace map: is the Fibonacci tube a critical quasicrystal? — `fibonacci_trace_map.py`
+
+**Setup.** Each cell of the model (a duct segment, then a ring of stubs) has a
+lossless 2×2 transfer matrix with det = 1. With S = d/(1 + φ⁻²) = 6.2013 mm and
+L = φS = 10.0339 mm (the infinite chain's gaps, mean spacing d), the Fibonacci
+words w₀ = S, w₁ = L, w_{j+1} = w_j w_{j−1} (the same substitution L → LS, S → L
+as `fibonacci_tube.py`; w₁₁ is its 144-ring sequence) give M_{j+1} = M_j M_{j−1}
+and, for x_j = ½ Tr M_j, the Kohmoto–Kadanoff–Tang trace map
+
+  x_{j+1} = 2 x_j x_{j−1} − x_{j−2},
+
+which conserves I = x²_{j+1} + x²_j + x²_{j−1} − 2 x_{j+1} x_j x_{j−1} − 1 at each
+frequency. The periodic approximant built from block w_j passes frequencies with
+|x_j| ≤ 1. For the discrete Fibonacci Hamiltonian, Sütő proved that I > 0 makes
+the spectrum a Cantor set of zero Lebesgue measure (and purely singular
+continuous); the argument runs through the trace-map dynamics, which this tube
+shares. It is not proved here for this acoustic model; the numerics below are
+consistent with it. The signature to look for: the total pass-band width B_j of
+the approximants shrinks as a **power law** in the block length F_j (critical
+scaling), unlike a periodic tube (B constant) or a disordered one (localization:
+B collapses faster, not as a clean power law).
+
+The matrices act on the dimensionless state (p, Z₀U), Z₀ = ρc/S:
+M′ = S⁻¹MS with S = diag(1, 1/Z₀), i.e. [[A, B/Z₀], [CZ₀, D]], and the stub term
+becomes Ȳ = Z₀Y = i(S_b/S) tan(k l_eff). Traces and determinants are unchanged.
+
+| Check | Test | Result |
+|---|---|---|
+| T1 | det(M′_j) = 1 ± 10⁻¹², j = 1..6, where all entries \|M′_j\| ≤ 10 | PASS: max 1.6×10⁻¹³; entries ≤ 10 at 89–97% of frequencies |
+| T2 | trace recursion vs explicit products, \|x_rec − x_prod\| / max(1, \|x_prod\|) ≤ 10⁻⁹ where the product is finite | **FAIL**: max 3.0×10⁻⁹ (2584 cells) |
+| T3 | I constant along j (\|I_j − I₁\| ≤ 10⁻⁹ max(1, \|I\|) where all three \|x\| ≤ 10); I > 0 on 0.5–25 kHz | PASS: max change 3.8×10⁻¹⁴; min I = 9.8×10⁻¹³ at 19.0038 kHz |
+| T4 | B_j within 0.5% between a 0.1 Hz and a 0.025 Hz grid, up to 4181 cells | PASS: 0.036% |
+| T5 | 6-cycle (0, 0, √(I+1)): linearization of Φ⁶ has eigenvalues μ, 1, 1/μ with μ + 1/μ = 16(1 + I)² + 2, relative error ≤ 10⁻⁹ | PASS: 4.4×10⁻¹⁶ for I from 10⁻¹² to 8×10⁹ |
+
+**History of T1 and T2.** As first specified — SI matrices (p, U) over the whole
+range for T1, and an absolute 10⁻¹⁰ for T2 — both failed by enormous margins
+(|det − 1| = 1.6×10¹¹⁹; |x_rec − x_prod| = 4.0×10²⁹²). Both were floating-point
+conditioning: Z₀ ≈ 7.5×10⁵ Pa·s/m³ in the SI entries, and stop-band products that
+grow as e^{γN} (to ~10⁷¹ at 13 cells), where FP64 can't evaluate AD − BC = 1
+without cancellation. T1 was reformulated as above (normalized matrices, masked
+to bounded entries) and passes.
+
+**T2 still fails with the relative tolerance, and is left as a finding.** The
+recursion is right — the relative error grows smoothly with chain length with no
+breakdown: 2.1×10⁻¹⁴ (8 cells), 7.0×10⁻¹³ (34), 4.3×10⁻¹¹ (144), 2.0×10⁻¹⁰
+(610), 1.2×10⁻⁹ (1597), 3.0×10⁻⁹ (2584), 1.7×10⁻⁹ (4181). That is rounding
+accumulated over thousands of 2×2 products (in the explicit product, the
+recursion, or both), so a fixed 10⁻⁹ holds only up to ~1000 cells; passing it
+over the full range would need a length-dependent tolerance.
+
+**I(f) > 0 everywhere on the grid.** It vanishes only where the cells stop
+scattering: at f_t = c/(2 l_eff) = 19.0038 kHz the stubs are half a wavelength
+deep (Y = 0) and the tube is a plain duct; it also falls toward 0 at low
+frequency (~10⁻⁶ at 0.5 kHz) as Y → 0.
+
+**Scaling** (total pass-band width of the periodic approximants, 0.5–25 kHz):
+
+| Block length (cells) | Fibonacci | Random order, same L/S counts (mean of 10) | Periodic |
+|---|---|---|---|
+| 8 | 17.46 kHz | 17.27 kHz | 21.52 kHz |
+| 34 | 15.76 kHz | 13.66 kHz | 21.52 kHz |
+| 144 | 14.37 kHz | 8.90 kHz | 21.52 kHz |
+| 610 | 13.23 kHz | 4.96 kHz | 21.52 kHz |
+| 4181 | 11.99 kHz | — | 21.52 kHz |
+
+- **Fibonacci:** B ∝ F^(−0.0601) over 8–4181 cells, rms residual 0.008 in ln B;
+  an exponential fits 10× worse (0.075). That is critical, power-law scaling.
+  α = 0.0601 is an **aggregate** over 0.5–25 kHz (B shrinks by φ^(−α) = 0.9715
+  per generation, 2.8%), not a constant of the tube — see the local exponents
+  below.
+- **Random order:** much faster collapse that fits neither form cleanly (power
+  law −0.29, residual 0.073; exponential residual 0.141): disorder-driven
+  localization, not critical scaling.
+- **Periodic:** constant, 21.52 kHz at every length.
+
+**Local exponent.** Fitting B ∝ F^(−α) separately in 1 kHz windows (34–4181
+cells):
+
+| Window | median I | α | | Window | median I | α |
+|---|---|---|---|---|---|---|
+| 1–2 kHz | 5.1×10⁻⁵ | 0.003 | | 13–14 kHz | 7.9×10⁻² | 0.157 |
+| 3–4 kHz | 1.8×10⁻³ | 0.019 | | 15–16 kHz | 2.4×10⁻² | 0.077 |
+| 5–6 kHz | 1.7×10⁻² | 0.060 | | 17–18 kHz | 4.1×10⁻³ | 0.026 |
+| 7–8 kHz | 0.16 | 0.195 | | 19–20 kHz | 4.7×10⁻⁴ | 0.007 |
+| 9–10 kHz | — | pass band vanishes | | 21–22 kHz | 1.4×10⁻² | 0.058 |
+| 11–12 kHz | 0.32 | 0.338 | | 23–24 kHz | 6.1×10⁻² | 0.132 |
+
+The exponent is set by the local coupling: across the windows α ∝ I^0.55 (rms
+residual 0.10 in ln α), with α/√I between 0.33 and 0.60. It goes to 0 as I → 0
+— no scattering, no shrinkage (the plain-duct limit keeps its full pass band at
+every length). The √I trend parallels the weak-coupling regime of the discrete
+Fibonacci Hamiltonian, where I scales as the square of the coupling, so α ∝ √I
+means α scales roughly linearly with the coupling; that correspondence is an
+analogy here, not derived for this model. An earlier heuristic formula,
+α(I) = ln λ₁ / (φ ln φ) with λ₁ = (1 + √(5 + 4I))/2, was rejected: it gives
+α ≥ 1/φ = 0.618 at every I, the opposite trend to every measured window. Its λ₁
+matches the 6-cycle only at I = 0 (μ = φ⁶ there); the exact relation is T5's.
+
+**Bench caveat.** In the infinite limit the Fibonacci spectrum has zero measure,
+but it gets there slowly, and how slowly depends on frequency. Where α < 0.03 —
+below ~4 kHz and around the 19 kHz transparency point — a finite tube shows
+essentially no pass-band erosion: halving B there would take more than 2^(1/0.03)
+≈ 10¹⁰ times more cells. Band thinning is concentrated where I is large: around
+the stub resonance (7–14 kHz, α up to 0.34) and, to a lesser degree, above
+~22 kHz (α ≈ 0.13 at 23–24 kHz). Even at α ≈ 0.34, halving B takes ~8× more
+cells, so a lab tube of tens to hundreds of rings is in the weakly critical
+regime, not a developed Cantor set. These are lossless transfer matrices; wall
+loss would blur the finest gaps first.
+
+(The heuristic alternative — rounding finite-tube gap-width ratios to the
+nearest power of φ, and a "dimension" from a −20 dB passband fit — was rejected:
+every ratio lies within a factor √φ of some power of φ by construction, Fibonacci
+ratios were no closer to powers of φ than random-order ratios (mean distance
+0.29 vs 0.26; chance is 0.25), and the "dimension" ranked random order (0.87) as
+more fractal than Fibonacci (0.91).)
+
+![](results/fibonacci_trace_map.png)
 
 ---
 
@@ -304,6 +422,8 @@ generations.
 - M. Visser, "Acoustic black holes", CQG 15, 1767 (1998)
 - S. Weinfurtner et al., "Measurement of stimulated Hawking emission in an analogue system", PRL 106, 021302 (2011)
 - N. Sugimoto, "Propagation of nonlinear acoustic waves in a tunnel with an array of Helmholtz resonators", JFM 244, 55 (1992)
+- M. Kohmoto, L. P. Kadanoff, C. Tang, "Localization problem in one dimension: mapping and escape", PRL 50, 1870 (1983)
+- A. Sütő, "Singular continuous spectrum on a Cantor set of zero Lebesgue measure for the Fibonacci Hamiltonian", J. Stat. Phys. 56, 525 (1989)
 - M. F. Hamilton & D. T. Blackstock (eds.), *Nonlinear Acoustics*
 
 *Built Oct 18, 2026 — Sportysport74 & Claude (Anthropic). Same license as the rest of this repo.*
