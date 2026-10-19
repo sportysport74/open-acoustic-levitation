@@ -39,19 +39,28 @@ class PhysicalSolver(AcousticMetricSolver):
     def __init__(self, v, L=1.0, c=1.0, xi=0.0, beta=0.0, nu=0.0):
         super().__init__(v, L, c)
         self.xi, self.beta, self.nu = xi, beta, nu
+        self.ikm2 = self.ikm * self.ikm
+        self.ikm4 = self.ikm2 * self.ikm2
+
+    def dxx_(self, f):
+        return torch.fft.irfft(self.ikm2 * torch.fft.rfft(f), n=self.N)
 
     def rhs(self, psi, pi):
-        psix = self.dx_(psi)
+        # 4 real FFTs (5 with viscosity): every linear term is assembled in Fourier
+        # space from the spectra of psi, v_eff*pi (and pi) -- was 14 complex FFTs.
+        P = torch.fft.rfft(psi)
+        psix = torch.fft.irfft(self.ikm * P, n=self.N)
         # v_eff appears in BOTH advection terms below, so a coefficient of
         # beta/2 gives a total steepening rate of beta (Burgers). Using beta
         # here steepens shocks twice as fast as real air (caught by test B1).
         v_eff = self.v + 0.5 * self.beta * psix
-        psixx = self.dx_(psix)
         dpsi = pi - v_eff * psix
-        dpi = (-self.dx_(v_eff * pi) + self.c ** 2 * psixx
-               - self.xi ** 2 * self.dx_(self.dx_(psixx))
-               + self.nu * self.dx_(self.dx_(pi)))
-        return dpsi, dpi
+        spec = -self.ikm * torch.fft.rfft(v_eff * pi) + self.c ** 2 * self.ikm2 * P
+        if self.xi:
+            spec = spec - self.xi ** 2 * self.ikm4 * P
+        if self.nu:
+            spec = spec + self.nu * self.ikm2 * torch.fft.rfft(pi)
+        return dpsi, torch.fft.irfft(spec, n=self.N)
 
     def stable_dt(self, cfl=0.25):
         kmax = self.k.abs().max().item() * 2 / 3
@@ -130,7 +139,7 @@ def main():
     g0 = eps * k
     ts_theory = 1.0 / (beta * eps * k * c)
     # inviscid Burgers: max gradient = g0 / (1 - t/t_s); reaches 5*g0 at t = 0.8 t_s
-    mon = lambda p, q: s.dx_(s.dx_(p)).abs().max()
+    mon = lambda p, q: s.dxx_(p).abs().max()
     psi, pi, _, _, hist = advance(s, psi, pi, 0.85 * ts_theory, monitor=mon)
     t5 = next((t for t, g in hist if g > 5 * g0), float("nan"))
     results.append(check("steepening time (gradient 5x)", abs(t5 / (0.8 * ts_theory) - 1) < 0.05,

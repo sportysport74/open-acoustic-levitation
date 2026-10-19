@@ -9,6 +9,7 @@ stubs per ring). Rings are placed either
     substitution L -> LS, S -> L (same average spacing d).
 Plots sound transmission vs frequency for both.
 """
+import sys
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -23,26 +24,47 @@ d = 8.57e-3
 loss = 3e-3  # small damping so resonances stay finite
 
 
+def wavenumbers(freqs, alpha=None):
+    """Complex duct and stub wavenumbers. alpha=None: the small proportional damping
+    above. alpha=(duct, stub) in Np/m: frequency-independent attenuation instead
+    (the loss model of tube_shock.py); alpha=(0, 0) is lossless."""
+    f = np.asarray(freqs, dtype=float)
+    if alpha is None:
+        k = 2 * np.pi * f / c * (1 - 1j * loss)
+        return k, k
+    return 2 * np.pi * f / c - 1j * alpha[0], 2 * np.pi * f / c - 1j * alpha[1]
+
+
+def stub_admittance(ks):
+    return 1j * S_b / (rho * c) * np.tan(ks * (l_s + 0.85 * r_s))
+
+
+def transfer(freqs, gaps, alpha=None):
+    """Complex pressure transmission and reflection coefficients (T, R) through a
+    ring after each gap, anechoic both ends; vectorized over frequency."""
+    k, ks = wavenumbers(freqs, alpha)
+    Y = stub_admittance(ks)
+    A, B, C, D = (np.ones_like(k), np.zeros_like(k), np.zeros_like(k), np.ones_like(k))
+    log2s = np.zeros(k.shape)        # M is carried as 2**log2s * [[A, B], [C, D]]
+    for g in gaps:
+        cs, sn = np.cos(k * g), np.sin(k * g)
+        # M <- M @ [[cs, iZ sn], [i sn / Z, cs]] @ [[1, 0], [Y, 1]]
+        a2, b2 = A * cs + B * (1j * sn / Z), A * (1j * Z * sn) + B * cs
+        c2, d2 = C * cs + D * (1j * sn / Z), C * (1j * Z * sn) + D * cs
+        A, B, C, D = a2 + b2 * Y, b2, c2 + d2 * Y, d2
+        # lossless runs near a stub resonance overflow after a few dozen rings; rescale by
+        # exact powers of two (results that never get this large are bit-for-bit unchanged)
+        big = np.maximum.reduce([np.abs(A), np.abs(B), np.abs(C), np.abs(D)]) > 2.0 ** 256
+        if big.any():
+            A[big], B[big], C[big], D[big] = (x[big] * 2.0 ** -256 for x in (A, B, C, D))
+            log2s[big] += 256
+    den = A + B / Z + C * Z + D
+    return 2 / den * np.exp2(-log2s), (A + B / Z - C * Z - D) / den
+
+
 def T_dB(freqs, gaps, alpha=None):
-    """Transmission (dB) through a ring after each gap, anechoic both ends.
-    alpha=None: the small proportional damping above. alpha=(duct, stub) in Np/m:
-    frequency-independent attenuation instead (the loss model of tube_shock.py)."""
-    out = []
-    for f in freqs:
-        if alpha is None:
-            k = ks = 2 * np.pi * f / c * (1 - 1j * loss)
-        else:
-            k, ks = 2 * np.pi * f / c - 1j * alpha[0], 2 * np.pi * f / c - 1j * alpha[1]
-        Y = 1j * S_b / (rho * c) * np.tan(ks * (l_s + 0.85 * r_s))
-        shunt = np.array([[1, 0], [Y, 1]])
-        M = np.eye(2, dtype=complex)
-        for g in gaps:
-            seg = np.array([[np.cos(k * g), 1j * Z * np.sin(k * g)],
-                            [1j * np.sin(k * g) / Z, np.cos(k * g)]])
-            M = M @ seg @ shunt
-        A, B, C, D = M.ravel()
-        out.append(20 * np.log10(abs(2 / (A + B / Z + C * Z + D))))
-    return np.array(out)
+    """Transmission (dB) through a ring after each gap, anechoic both ends."""
+    return 20 * np.log10(np.abs(transfer(freqs, gaps, alpha)[0]))
 
 
 def fibonacci(n):
@@ -89,6 +111,57 @@ def fmt_dB(x):
     return "< -100 dB" if x < -100 else f"{x:6.1f} dB"
 
 
+def check(name, ok, detail):
+    print(f"  [{'PASS' if ok else 'FAIL'}] {name}: {detail}")
+    return ok
+
+
+def bloch_rhs(f):
+    """cos(q d) of the infinite periodic lattice (lossless):
+    cos(k d) + (i Z Y / 2) sin(k d). |RHS| > 1 means a band gap."""
+    k, ks = wavenumbers(f, (0.0, 0.0))
+    return (np.cos(k * d) + 0.5j * Z * stub_admittance(ks) * np.sin(k * d)).real
+
+
+def intervals(mask, f):
+    """[lo, hi] (kHz) of runs where mask is True."""
+    edges = np.flatnonzero(np.diff(np.concatenate(([0], mask.astype(int), [0]))))
+    return [(f[i] / 1e3, f[j - 1] / 1e3) for i, j in zip(edges[::2], edges[1::2])]
+
+
+def validate(N=55):
+    print(f"\nCHECKS ({N} rings)")
+    results = []
+    per_gaps, fib_gaps, _ = layouts(N)
+    # E1: a lossless two-port conserves energy
+    for name, gaps in (("periodic", per_gaps), ("fibonacci", fib_gaps)):
+        T, R = transfer(freqs, gaps, alpha=(0.0, 0.0))
+        err = np.max(np.abs(np.abs(T) ** 2 + np.abs(R) ** 2 - 1))
+        results.append(check(f"lossless {name}: |R|^2 + |T|^2 = 1", err < 1e-9, f"max deviation {err:.1e}"))
+    # B1: periodic gaps vs the Bloch condition of the infinite lattice
+    fb = np.linspace(500, 25000, 245001)                       # 0.1 Hz grid
+    rhs = bloch_rhs(fb)
+    bloch = intervals(np.abs(rhs) > 1, fb)
+    depth = [N * 8.686 * np.arccosh(np.abs(rhs[(fb >= lo * 1e3) & (fb <= hi * 1e3)]).max()) for lo, hi in bloch]
+    Tl = T_dB(fb, per_gaps, alpha=(0.0, 0.0))
+    finite = [(lo, hi) for lo, hi, ed in gaps_list(Tl, freqs=fb) if not ed]
+    for (lo, hi), dep in zip(bloch, depth):
+        if dep < 20:
+            print(f"    Bloch gap {lo:.3f}-{hi:.3f} kHz: max attenuation {dep:.1f} dB in {N} cells, "
+                  f"too shallow to reach -20 dB (finite tube min {Tl[(fb >= lo*1e3) & (fb <= hi*1e3)].min():.1f} dB)")
+            continue
+        match = [(x, y) for x, y in finite if x <= hi and y >= lo]
+        err = max(abs(match[0][0] - lo), abs(match[0][1] - hi)) if len(match) == 1 else float("inf")
+        results.append(check(f"Bloch gap {lo:.3f}-{hi:.3f} kHz", err < 0.15,
+                             f"finite lossless tube blocks " + (f"{match[0][0]:.3f}-{match[0][1]:.3f} kHz, "
+                             f"edges within {err*1e3:.0f} Hz" if len(match) == 1 else f"{len(match)} matching bands")))
+    stray = [(x, y) for x, y in finite if not any(x <= hi and y >= lo for lo, hi in bloch)]
+    results.append(check("no blocked band outside a Bloch gap", not stray,
+                         ", ".join(f"{x:.2f}-{y:.2f}" for x, y in stray) or "none"))
+    print("\nSUMMARY:", "ALL TESTS PASS" if all(results) else "SOME TESTS FAILED")
+    return all(results)
+
+
 def main(N=55):  # a Fibonacci number of rings
     per_gaps, fib_gaps, Sg = layouts(N)
     Tp, Tf = T_dB(freqs, per_gaps), T_dB(freqs, fib_gaps)
@@ -120,7 +193,8 @@ def main(N=55):  # a Fibonacci number of rings
     for name, T in (("periodic", Tp), ("fibonacci", Tf)):
         print(f"  {name:21s}" + "".join(f"{sum(not e for *_, e in gaps_list(T, t)):11d}" for t in THRESHOLDS))
     print("saved fibonacci_tube.png")
+    return 0 if validate(N) else 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

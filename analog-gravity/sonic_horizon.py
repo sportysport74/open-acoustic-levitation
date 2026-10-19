@@ -27,7 +27,7 @@ goes to zero there, so sound piles up (white hole) or peels apart (black hole).
 NUMERICS
 --------
 Pseudo-spectral derivatives (FFT) on a periodic domain, 4th-order Runge-Kutta
-in time, 2/3-rule dealiasing. Runs on CUDA if available, otherwise CPU.
+in time, 2/3-rule dealiasing. Runs on CPU (ANALOG_GRAVITY_DEVICE=cuda for a GPU).
 
 VALIDATION (every run checks itself against known answers)
 ----------------------------------------------------------
@@ -43,10 +43,13 @@ Units: c = 1, domain length L = 1. Multiply by real c and L for lab numbers.
 """
 
 import math
+import os
 import sys
 import torch
 
-DEV = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# CPU by default: at N <= 4096 in float64 the CPU is ~2x faster per step than an
+# RTX 5090 (small FP64 FFTs can't fill a consumer GPU). ANALOG_GRAVITY_DEVICE=cuda overrides.
+DEV = torch.device(os.environ.get("ANALOG_GRAVITY_DEVICE", "cpu"))
 DT_ = torch.float64
 
 
@@ -57,17 +60,21 @@ class AcousticMetricSolver:
         self.dx = L / self.N
         self.v = v.to(DEV, DT_)
         k = 2 * math.pi * torch.fft.fftfreq(self.N, d=self.dx).to(DEV, DT_)
-        self.ik = 1j * k
-        self.k = k
-        self.mask = (k.abs() < (2 / 3) * k.abs().max()).to(DT_)  # 2/3 dealias
+        self.k = k                                   # full spectrum (analytic signal in local_k)
+        kr = 2 * math.pi * torch.fft.rfftfreq(self.N, d=self.dx).to(DEV, DT_)
+        mask = (kr.abs() < (2 / 3) * k.abs().max()).to(DT_)  # 2/3 dealias
+        self.ikm = 1j * kr * mask                    # masked spectral d/dx on the real-FFT half spectrum
 
     def dx_(self, f):
-        return torch.fft.ifft(self.ik * self.mask * torch.fft.fft(f)).real
+        return torch.fft.irfft(self.ikm * torch.fft.rfft(f), n=self.N)
 
     def rhs(self, psi, pi):
-        psix = self.dx_(psi)
+        # 4 real FFTs: psi_xx is formed in Fourier space instead of differentiating psi_x again
+        P = torch.fft.rfft(psi)
+        psix = torch.fft.irfft(self.ikm * P, n=self.N)
         dpsi = pi - self.v * psix
-        dpi = -self.dx_(self.v * pi) + self.c ** 2 * self.dx_(psix)
+        dpi = torch.fft.irfft(-self.ikm * torch.fft.rfft(self.v * pi)
+                              + self.c ** 2 * (self.ikm * self.ikm) * P, n=self.N)
         return dpsi, dpi
 
     def step(self, psi, pi, dt):
@@ -176,11 +183,13 @@ def main(make_plot=True):
     # ---- T2: uniform flow ---------------------------------------------------
     print("\nT2  uniform flow (v = -0.5c)")
     s = AcousticMetricSolver(torch.full((N,), -0.5), L, c)
-    for direction, expect in ((+1, 0.5), (-1, -1.5)):
-        psi, pi = packet(N, L, 0.5, 0.03, 200.0, c, -0.5, direction)
-        x0 = s.centroid(psi)
-        psi, pi, *_ = run(s, psi, pi, 0.2)
-        dxw = (s.centroid(psi) - x0 + L/2) % L - L/2
+    cases = ((+1, 0.5), (-1, -1.5))
+    # both packets advance together as one batched (2, N) run: same solver, same dt
+    pk = [packet(N, L, 0.5, 0.03, 200.0, c, -0.5, direction) for direction, _ in cases]
+    x0s = [s.centroid(p) for p, _ in pk]
+    psi, pi, *_ = run(s, torch.stack([p for p, _ in pk]), torch.stack([q for _, q in pk]), 0.2)
+    for (direction, expect), x0, psi_d in zip(cases, x0s, psi):
+        dxw = (s.centroid(psi_d) - x0 + L/2) % L - L/2
         sp = dxw / 0.2
         results.append(check(f"{'right' if direction>0 else 'left'}-mover speed = v{'+' if direction>0 else '-'}c",
                              abs(sp - expect) < 5e-3, f"{sp:.4f} (expect {expect:.4f})"))

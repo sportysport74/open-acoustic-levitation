@@ -27,6 +27,9 @@ every NL_EVERY steps: Burgers flux beta F^2/2 on the lattice (Godunov,
 Courant number NL_EVERY*beta*|F| << 1). At a junction the nonlinear flux leaving
 the left segment uses the incoming value and the flux entering the right segment
 uses the outgoing value (the junction conditions apply to point values).
+The step loop is compiled with numba when available (bitwise identical to the
+numpy loop, which remains as a fallback), and independent runs execute in
+parallel worker processes.
 
 VALIDATION (runs first; the comparison runs only if every check passes)
 ------------------------------------------------------------------------
@@ -42,8 +45,10 @@ C1  grid convergence: periodic tube at 160 dB, dx vs 2 dx
 SPL convention as resonator_tube_design.py: L = 20 log10(p_peak / 20 uPa).
 """
 import math
+import os
 import sys
 import time
+from concurrent.futures import ProcessPoolExecutor
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
@@ -58,6 +63,8 @@ DX = 0.0348385e-3             # lattice spacing (m), see docstring
 NL_EVERY = 8
 GRAD_H = 16                   # N1 gradient stencil half-width (0.56 mm, vs 2.2 mm gradient scale at 5x)
 L_EFF = l_s + 0.85 * r_s      # stub length incl. end correction (as fibonacci_tube.py)
+WORKERS = max(1, min(9, (os.cpu_count() or 2) - 1))  # parallel independent runs
+NUMPY_LOOP = False            # True: force the (slow) numpy step loop even if numba is installed
 
 
 def kirchhoff(f, radius):     # boundary-layer attenuation, Np/m (as resonator_tube_design.py)
@@ -88,6 +95,78 @@ def burgers_substep(U, j_out, j_in, k):
     inn[1:] = fl; inn[0] = h[0]
     out[j_out] = h[j_out]; inn[j_in] = h[j_in]
     U -= k * BETA * (out - inn)
+
+
+try:
+    from numba import njit
+except ImportError:          # falls back to the numpy step loop in Tube.run (same numbers, ~15x slower)
+    njit = None
+
+if njit:
+    @njit(cache=True)
+    def _burgers_nb(U, j_out, j_in, kb, fl, out, inn):
+        """Same arithmetic, in the same order, as burgers_substep."""
+        N = U.shape[0]
+        for i in range(N - 1):
+            uL, uR = U[i], U[i + 1]
+            fL, fR = 0.5 * uL * uL, 0.5 * uR * uR
+            if uL > uR:
+                fl[i] = fL if fL > fR else fR
+            elif uL > 0:
+                fl[i] = fL
+            elif uR < 0:
+                fl[i] = fR
+            else:
+                fl[i] = 0.0
+        for i in range(N - 1):
+            out[i] = fl[i]; inn[i + 1] = fl[i]
+        out[N - 1] = 0.5 * U[N - 1] * U[N - 1]; inn[0] = 0.5 * U[0] * U[0]
+        for j in j_out:
+            out[j] = 0.5 * U[j] * U[j]
+        for j in j_in:
+            inn[j] = 0.5 * U[j] * U[j]
+        for i in range(N):
+            U[i] -= kb * (out[i] - inn[i])
+
+    @njit(cache=True)
+    def _run_nb(src, nsteps, N, e, s, r_out, r_in, rs, fr, m, M, w, Sd, Sb, q,
+                nl_every, kb, n0, n1, h, gmax):
+        """The Tube.run step loop compiled; same arithmetic, in the same order."""
+        K = e.shape[0]
+        F = np.zeros(N); G = np.zeros(N); buf = np.zeros((M, K)); exit_ = np.empty(nsteps)
+        FL = np.empty(K); GR = np.zeros(K); p = np.empty(K)
+        fl = np.empty(N - 1); out = np.empty(N); inn = np.empty(N)
+        Gr = G[::-1]
+        for n in range(nsteps):
+            i1, i2, iw = (n - m) % M, (n - m - 1) % M, n % M
+            for j in range(K):
+                b = rs * ((1 - fr) * buf[i1, j] + fr * buf[i2, j])
+                FL[j] = F[e[j]]
+                if j < K - 1:
+                    GR[j] = G[s[j]]
+                p[j] = w * (Sd * FL[j] + Sd * GR[j] + Sb * b)
+                buf[iw, j] = p[j] - b
+            # shift + loss fused: same multiply by q on the same values as the numpy loop
+            for i in range(N - 1, 0, -1):
+                F[i] = F[i - 1] * q
+            F[0] = src[n] * q
+            for j in range(K - 1):
+                F[s[j]] = (p[j] - GR[j]) * q
+            exit_[n] = p[K - 1] - GR[K - 1]
+            for i in range(N - 1):
+                G[i] = G[i + 1] * q
+            G[N - 1] *= q
+            for j in range(K):
+                G[e[j]] = (p[j] - FL[j]) * q
+            if kb != 0.0 and n % nl_every == 0:
+                _burgers_nb(F, e[:-1], s, kb, fl, out, inn)
+                _burgers_nb(Gr, r_out, r_in, kb, fl, out, inn)
+            if n0 <= n < n1:
+                for i in range(N - 2 * h):
+                    v = abs(F[i + 2 * h] - F[i])
+                    if v > gmax[i]:
+                        gmax[i] = v
+        return exit_
 
 
 class Tube:
@@ -123,6 +202,13 @@ class Tube:
         w = 2 / (2 * S + self.Sb)
         h = GRAD_H
         gmax = np.zeros(N - 2 * h) if track_grad else None
+        if njit and not NUMPY_LOOP:
+            n0, n1 = track_grad or (0, 0)
+            exit_ = _run_nb(np.asarray(src, dtype=float), nsteps, N, e, s, self.r_out, self.r_in,
+                            self.rs, self.fr, self.m, self.M, w, S, self.Sb, self.q, NL_EVERY,
+                            NL_EVERY * BETA if self.beta else 0.0, n0, n1, h,
+                            gmax if track_grad else np.zeros(1))
+            return (exit_, gmax / (2 * h * self.dx)) if track_grad else exit_
         for n in range(nsteps):
             b = self.rs * ((1 - self.fr) * buf[(n - self.m) % self.M] + self.fr * buf[(n - self.m - 1) % self.M])
             FL = F[e]; GR[:-1] = G[s]
@@ -170,72 +256,92 @@ def steady_run(tube, level, settle=8.0):
     return tube.run(tone(spl_to_eps(level), nsteps, tube.dt), nsteps)
 
 
+def _sim(job):
+    """One independent simulation (runs in a worker process)."""
+    kind, gaps, kw, arg = job
+    tube = Tube(gaps, **kw)
+    if kind == "l1":                          # broadband pulse, tiny amplitude
+        sig_t = 2 / (2 * np.pi * 25e3)        # Gaussian pulse, still ~-17 dB at 25 kHz
+        nsteps = int(0.08 / tube.dt)
+        t = np.arange(nsteps) * tube.dt
+        src = 1e-9 * np.exp(-0.5 * ((t - 8 * sig_t) / sig_t) ** 2)
+        out = tube.run(src, nsteps)
+        tail = np.sum(out[-nsteps // 10:] ** 2) / np.sum(out ** 2)
+        f = np.fft.rfftfreq(nsteps, tube.dt)
+        sel = (f >= 500) & (f <= 25000)
+        return f[sel], 20 * np.log10(np.abs(np.fft.rfft(out)[sel] / np.fft.rfft(src)[sel])), tail
+    if kind == "n1":                          # max gradient over one period, steady state
+        n0 = int((tube.length / c + 4 / F0) / tube.dt); n1 = n0 + int(1 / F0 / tube.dt) + 1
+        return tube.run(tone(arg, n1, tube.dt), n1, track_grad=(n0, n1))[1]
+    return steady_run(tube, arg), tube.dt     # "steady": tone at `arg` dB
+
+
+def run_all(jobs):
+    """Independent runs in parallel worker processes; results in job order (each run
+    is deterministic, so the numbers don't depend on which process ran it)."""
+    if WORKERS > 1 and len(jobs) > 1:
+        with ProcessPoolExecutor(min(WORKERS, len(jobs))) as ex:
+            return list(ex.map(_sim, jobs))
+    return [_sim(j) for j in jobs]
+
+
 def main():
     t_start = time.time()
     results = []
     print(f"lattice dx = {DX*1e3:.5f} mm, dt = {DX/c*1e9:.1f} ns; nonlinear sub-step every {NL_EVERY} steps")
     print(f"wall loss (Kirchhoff at {2*F0/1e3:g} kHz): duct {ALPHA[0]:.3f} Np/m, stubs {ALPHA[1]:.3f} Np/m")
+    eps = spl_to_eps(160); k = 2 * np.pi * F0 / c
+    per, fib, _ = layouts(N_RINGS)
+    l1_cases = [(N, name, gaps) for N in (55, 144)
+                for name, gaps in zip(("periodic", "fibonacci"), layouts(N)[:2])]
+    plain = dict(stub_area=0.0)
+    jobs = ([("l1", gaps, {}, None) for _, _, gaps in l1_cases]
+            + [("n1", [0.75], dict(stub_area=0.0, alpha=(0.0, 0.0)), eps)]
+            + [("steady", [sum(per)], plain, 160), ("steady", per, plain, 160)]
+            + [("steady", per, {}, 160), ("steady", per, dict(dx=2 * DX), 160)])
+    out = run_all(jobs)
 
     # ---- L1: linear limit vs transfer matrices --------------------------------
     print("\nL1  linear limit: time-domain transmission vs fibonacci_tube.T_dB (same loss)")
-    sig_t = 2 / (2 * np.pi * 25e3)               # Gaussian pulse, still ~-17 dB at 25 kHz
     l1 = {}
-    for N in (55, 144):
-        per, fib, _ = layouts(N)
-        for name, gaps in (("periodic", per), ("fibonacci", fib)):
-            tube = Tube(gaps)
-            nsteps = int(0.08 / tube.dt)
-            t = np.arange(nsteps) * tube.dt
-            src = 1e-9 * np.exp(-0.5 * ((t - 8 * sig_t) / sig_t) ** 2)
-            out = tube.run(src, nsteps)
-            tail = np.sum(out[-nsteps // 10:] ** 2) / np.sum(out ** 2)
-            f = np.fft.rfftfreq(nsteps, tube.dt)
-            sel = (f >= 500) & (f <= 25000)
-            Ttd = 20 * np.log10(np.abs(np.fft.rfft(out)[sel] / np.fft.rfft(src)[sel]))
-            Ttm = T_dB(f[sel], gaps, alpha=ALPHA)
-            mask = Ttm > -40
-            err = np.max(np.abs(Ttd - Ttm)[mask])
-            gtd = [(lo, hi) for lo, hi, ed in gaps_list(Ttd, freqs=f[sel]) if not ed]
-            gtm = [(lo, hi) for lo, hi, ed in gaps_list(Ttm, freqs=f[sel]) if not ed]
-            edge_err = (max(max(abs(x1 - x2), abs(y1 - y2)) for (x1, y1), (x2, y2) in zip(gtd, gtm))
-                        if len(gtd) == len(gtm) and gtd else float("inf"))
-            results.append(check(f"{N} rings {name}: |T| where T > -40 dB", err < 0.5,
-                                 f"max error {err:.3f} dB (tail energy {tail:.1e})"))
-            results.append(check(f"{N} rings {name}: gaps < -20 dB", len(gtd) == len(gtm) and edge_err < 0.1,
-                                 f"{len(gtd)} vs {len(gtm)} gaps, edges within {edge_err*1e3:.0f} Hz"))
-            l1[(N, name)] = (f[sel], Ttd, Ttm)
-            # informational: how much the loss model matters for the gap structure
-            if N == 55:
-                gdef = [(lo, hi) for lo, hi, ed in gaps_list(T_dB(f[sel], gaps), freqs=f[sel]) if not ed]
-                print(f"    (fibonacci_tube.py default loss gives {len(gdef)} gaps: "
-                      + ", ".join(f"{x:.1f}-{y:.1f}" for x, y in gdef) + " kHz; this loss: "
-                      + ", ".join(f"{x:.1f}-{y:.1f}" for x, y in gtm) + " kHz)")
+    for (N, name, gaps), (f, Ttd, tail) in zip(l1_cases, out[:4]):
+        Ttm = T_dB(f, gaps, alpha=ALPHA)
+        mask = Ttm > -40
+        err = np.max(np.abs(Ttd - Ttm)[mask])
+        gtd = [(lo, hi) for lo, hi, ed in gaps_list(Ttd, freqs=f) if not ed]
+        gtm = [(lo, hi) for lo, hi, ed in gaps_list(Ttm, freqs=f) if not ed]
+        edge_err = (max(max(abs(x1 - x2), abs(y1 - y2)) for (x1, y1), (x2, y2) in zip(gtd, gtm))
+                    if len(gtd) == len(gtm) and gtd else float("inf"))
+        results.append(check(f"{N} rings {name}: |T| where T > -40 dB", err < 0.5,
+                             f"max error {err:.3f} dB (tail energy {tail:.1e})"))
+        results.append(check(f"{N} rings {name}: gaps < -20 dB", len(gtd) == len(gtm) and edge_err < 0.1,
+                             f"{len(gtd)} vs {len(gtm)} gaps, edges within {edge_err*1e3:.0f} Hz"))
+        l1[(N, name)] = (f, Ttd, Ttm)
+        # informational: how much the loss model matters for the gap structure
+        if N == 55:
+            gdef = [(lo, hi) for lo, hi, ed in gaps_list(T_dB(f, gaps), freqs=f) if not ed]
+            print(f"    (fibonacci_tube.py default loss gives {len(gdef)} gaps: "
+                  + ", ".join(f"{x:.1f}-{y:.1f}" for x, y in gdef) + " kHz; this loss: "
+                  + ", ".join(f"{x:.1f}-{y:.1f}" for x, y in gtm) + " kHz)")
 
     # ---- N1: Burgers steepening distance, no stubs, no loss ------------------
     print("\nN1  no stubs, finite amplitude: steepening distance vs Burgers x_s = 1/(beta eps k)")
-    eps = spl_to_eps(160); k = 2 * np.pi * F0 / c
     xs = 1 / (BETA * eps * k)
-    tube = Tube([0.75], stub_area=0.0, alpha=(0.0, 0.0))
-    n0 = int((tube.length / c + 4 / F0) / tube.dt); n1 = n0 + int(1 / F0 / tube.dt) + 1
-    _, gmax = tube.run(tone(eps, n1, tube.dt), n1, track_grad=(n0, n1))
-    ratio = gmax / (eps * k)
-    x5 = (np.argmax(ratio > 5) + GRAD_H + 0.5) * tube.dx if (ratio > 5).any() else float("nan")
+    ratio = out[4] / (eps * k)
+    x5 = (np.argmax(ratio > 5) + GRAD_H + 0.5) * DX if (ratio > 5).any() else float("nan")
     results.append(check("gradient 5x distance", abs(x5 / (0.8 * xs) - 1) < 0.05,
                          f"sim {x5:.4f} m vs Burgers 0.8 x_s = {0.8*xs:.4f} m (160 dB, x_s = {xs:.3f} m)"))
 
     # ---- N2: transparent junctions -------------------------------------------
     print("\nN2  zero-area stubs at every ring: must reproduce the plain tube (160 dB)")
-    per, fib, _ = layouts(N_RINGS)
-    hp = harmonics(steady_run(Tube([sum(per)], stub_area=0.0), 160), DX / c, F0)
-    hj = harmonics(steady_run(Tube(per, stub_area=0.0), 160), DX / c, F0)
+    hp, hj = (harmonics(sig, dt, F0) for sig, dt in out[5:7])
     dd = np.abs(spl(hj[:3]) - spl(hp[:3]))
     results.append(check("f, 2f, 3f at exit", dd.max() < 0.2,
                          "differences " + ", ".join(f"{x:.3f}" for x in dd) + " dB"))
 
     # ---- C1: grid convergence -------------------------------------------------
     print("\nC1  grid convergence: periodic tube, 160 dB, dx vs 2 dx")
-    h1 = harmonics(steady_run(Tube(per), 160), DX / c, F0)
-    h2 = harmonics(steady_run(Tube(per, dx=2 * DX), 160), 2 * DX / c, F0)
+    h1, h2 = (harmonics(sig, dt, F0) for sig, dt in out[7:9])
     dd = np.abs(spl(h1[:3]) - spl(h2[:3]))
     results.append(check("f, 2f, 3f at exit", dd.max() < 1.0,
                          "differences " + ", ".join(f"{x:.2f}" for x in dd) + " dB"))
@@ -248,23 +354,23 @@ def main():
 
     # ---- comparison -----------------------------------------------------------
     L = sum(per)
-    tubes = (("plain", Tube([L], stub_area=0.0)), ("periodic", Tube(per)), ("Fibonacci", Tube(fib)))
+    tubes = (("plain", [L], plain), ("periodic", per, {}), ("Fibonacci", fib, {}))
+    levels = (150, 155, 160)
+    out = run_all([("steady", gaps, kw, level) for level in levels for _, gaps, kw in tubes])
     print(f"\nCOMPARISON  5 kHz, {N_RINGS} rings, tube length {L:.3f} m, exit levels (dB re 20 uPa, peak)")
     print("  level   x/x_s   tube         f       2f      3f     2f-f    3f-f")
     wave = {}
-    for level in (150, 155, 160):
+    for (level, (name, _, _)), (sig, dt) in zip(((lv, t) for lv in levels for t in tubes), out):
         xs = 1 / (BETA * spl_to_eps(level) * k)
-        for name, tube in tubes:
-            sig = steady_run(tube, level)
-            h = harmonics(sig, tube.dt, F0)
-            hprev = harmonics(sig[:-int(round(10 / F0 / tube.dt))], tube.dt, F0)
-            Lh = spl(h[:3])
-            drift = np.max(np.abs(Lh - spl(hprev[:3])))
-            print(f"  {level} dB  {L/xs:5.2f}   {name:10s} {Lh[0]:7.1f} {Lh[1]:7.1f} {Lh[2]:7.1f} "
-                  f"{Lh[1]-Lh[0]:7.1f} {Lh[2]-Lh[0]:7.1f}   (steady to {drift:.2f} dB)")
-            nper = int(round(2 / F0 / tube.dt))
-            wave[(level, name)] = (sig[-nper:] / spl_to_eps(level), Lh)
-    plot_waveforms(wave, [n for n, _ in tubes], L)
+        h = harmonics(sig, dt, F0)
+        hprev = harmonics(sig[:-int(round(10 / F0 / dt))], dt, F0)
+        Lh = spl(h[:3])
+        drift = np.max(np.abs(Lh - spl(hprev[:3])))
+        print(f"  {level} dB  {L/xs:5.2f}   {name:10s} {Lh[0]:7.1f} {Lh[1]:7.1f} {Lh[2]:7.1f} "
+              f"{Lh[1]-Lh[0]:7.1f} {Lh[2]-Lh[0]:7.1f}   (steady to {drift:.2f} dB)")
+        nper = int(round(2 / F0 / dt))
+        wave[(level, name)] = (sig[-nper:] / spl_to_eps(level), Lh)
+    plot_waveforms(wave, [n for n, _, _ in tubes], L)
     print(f"\nrun time {time.time()-t_start:.0f} s")
     return 0
 
