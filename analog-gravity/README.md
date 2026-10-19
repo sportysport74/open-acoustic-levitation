@@ -23,7 +23,7 @@ on a GPU, but at these sizes that's slower.
 > |---|---|---|---|---|
 > | `sonic_horizon.py` | 99–103 s | 40–41 s | 2.5× | CPU; 6 → 4 real FFTs per RHS; both T2 packets as one batched run |
 > | `sonic_horizon_physical.py` | 231–236 s | 39–40 s | 6.0× | CPU; 14 → 4–5 real FFTs per RHS (all linear terms in Fourier space) |
-> | `kdv_test.py` | 93–97 s | 15 s | 6.3× | same solver changes |
+> | `kdv_test.py` | 93–97 s | 15 s | 6.3× | same solver changes (both at N = 1024; the comparison runs now use N = 4096, ~160 s — see section 3) |
 > | `tube_shock.py` | 840–971 s | 39–129 s (100 s incl. numba compile) | ~16× typical | numba step loop (bitwise identical to the numpy loop, which remains as a fallback); 9 independent runs in parallel processes |
 >
 > The `tube_shock.py` after-times vary run to run (42, 39, 53 s steady; one
@@ -94,7 +94,7 @@ Real air's dispersion length (~70 nm) is far too small to help at 40 kHz.
 |---|---|---|
 | K1 | escape wavenumber from the Newton solve: v_g(k*) = 1.4c (complex-step derivative of ω(k)) | error 0.0 (limit 10⁻⁹) — PASS |
 | K2 | separate inviscid run (ν = 0, N = 4096) must track Burgers (B1 method: gradient 5× at 0.8 t_s, 5%) | 0.3790 vs 0.3789 — PASS |
-| K3 | the actual ν = 10⁻⁵, N = 1024 shock run vs the exact viscous Burgers solution (Cole–Hopf, diffusivity ν/2 as measured by V1): waveform rms < 1% of u₀, peak gradient within 2% | **FAIL**: rms 2.41%; peak gradient 8.58× vs exact 11.12× |
+| K3 | the actual ν = 10⁻⁵ shock run vs the exact viscous Burgers solution (Cole–Hopf, diffusivity ν/2 as measured by V1): waveform rms < 1% of u₀, peak gradient within 2% | N = 4096: rms 0.09%; peak gradient 11.10× vs exact 11.12× — PASS (failed at N = 1024, below) |
 
 **K2 failed on its first run.** It was first applied to the ν = 10⁻⁵ comparison
 run and reached 5× at 0.4762 vs 0.3789 (26% late). The cause is that run's
@@ -102,16 +102,28 @@ viscosity, not the grid: with ν = 0 the same N = 1024 run reaches 5× at
 1.04 × 0.8 t_s and N = 4096 at 1.00×; with ν = 10⁻⁵ even N = 4096 is 22% late.
 ν = 10⁻⁵ gives a Gol'dberg number of only βε/(νk) ≈ 13, so the comparison's
 "no dispersion" run is a strongly viscous Burgers shock, not inviscid Burgers.
-The comparison runs are left unchanged; K2 now checks a separate inviscid run,
-and K3 checks the viscous run against the right answer for it.
+The comparison runs keep ν = 10⁻⁵; K2 now checks a separate inviscid run, and
+K3 checks the viscous run against the right answer for it.
 
-**K3 is an open finding:** N = 1024 under-resolves the viscous shock (about
-0.6 cells thick). The same run converges to the exact solution as the grid is
-refined — rms error 2.41% → 0.27% → 0.089% → 0.088% and peak gradient
-8.58× → 10.63× → 11.10× → 11.12× for N = 1024, 2048, 4096, 8192 (exact 11.12×).
-So the true peak gradient of the viscous shock is 11.1×, not the 8.6× plotted.
-The dispersion result isn't affected: the ξ = 10⁻³ run's gradient plateau is
-1.401× at both N = 1024 and N = 4096.
+**K3 failed at N = 1024, and the plot was corrected.** The comparison runs were
+originally N = 1024, where the ν = 10⁻⁵ viscous shock is only about 0.6 cells
+thick: K3 failed (rms 2.41%, peak gradient 8.58× vs exact 11.12×), and the plot
+showed the shock gradient saturating at 8.6×. The same run converges to the
+exact solution as the grid is refined:
+
+| N | rms error vs exact | peak gradient (exact 11.12×) |
+|---|---|---|
+| 1024 | 2.41% | 8.58× |
+| 2048 | 0.27% | 10.63× |
+| 4096 | 0.089% | 11.10× |
+| 8192 | 0.088% | 11.12× |
+
+The comparison runs now use N = 4096 (affordable after the speedup; ~160 s on
+CPU) with K3's tolerances unchanged, and K3 passes. The plot was regenerated: the
+shock's peak gradient now reads 11.1× instead of the under-resolved 8.6×, and the
+shock front is smooth instead of a grid-scale staircase. The dispersion result is
+unchanged: the ξ = 10⁻³ run's gradient plateau is 1.401× at both N = 1024 and
+N = 4096.
 
 ![](results/shock_vs_dispersion.png)
 

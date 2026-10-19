@@ -52,7 +52,9 @@ def count_pulses(u, min_prom):
     return count
 
 
-N, L, c = 1024, 1.0, 1.0
+# N = 4096 resolves the nu = 1e-5 viscous shock (~2.5 cells thick). At N = 1024 it
+# was ~0.6 cells: K3 failed (rms 2.41%, peak gradient 8.58x vs exact 11.12x).
+N, L, c = 4096, 1.0, 1.0
 x = torch.arange(N, device=DEV, dtype=DT_) / N
 beta, eps, m = 1.2, 0.014, 20; k = 2*math.pi*m
 ts = 1/(beta*eps*k)
