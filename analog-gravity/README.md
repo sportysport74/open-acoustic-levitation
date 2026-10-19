@@ -30,7 +30,7 @@ on a GPU, but at these sizes that's slower.
 > unexplained 129 s outlier).
 
 ```bash
-pip install torch numpy matplotlib numba   # numba optional (tube_shock.py ~15x slower without)
+pip install torch numpy matplotlib numba mpmath   # numba optional (tube_shock.py ~15x slower without); mpmath for fibonacci_trace_map.py
 python sonic_horizon.py            # phase 1: ideal acoustic metric
 python sonic_horizon_physical.py   # phase 2: dispersion, shocks, viscosity
 python kdv_test.py                 # shock vs dispersion
@@ -38,7 +38,7 @@ python resonator_tube_design.py    # bench-build feasibility numbers
 python fibonacci_tube.py           # golden-ratio quasicrystal tube
 python tube_shock.py               # does the resonator tube stop the shock? (~1 min with numba)
 python fibonacci_sweep.py          # quasicrystal or not? generation sweep + random control
-python fibonacci_trace_map.py      # KKT trace map: critical scaling vs controls (~6 min)
+python fibonacci_trace_map.py      # KKT trace map: critical scaling vs controls (several minutes)
 ```
 
 ---
@@ -326,7 +326,7 @@ becomes Ȳ = Z₀Y = i(S_b/S) tan(k l_eff). Traces and determinants are unchange
 | Check | Test | Result |
 |---|---|---|
 | T1 | det(M′_j) = 1 ± 10⁻¹², j = 1..6, where all entries \|M′_j\| ≤ 10 | PASS: max 1.6×10⁻¹³; entries ≤ 10 at 89–97% of frequencies |
-| T2 | trace recursion vs explicit products, \|x_rec − x_prod\| / max(1, \|x_prod\|) ≤ 10⁻⁹ where the product is finite | **FAIL**: max 3.0×10⁻⁹ (2584 cells) |
+| T2 | FP64 trace recursion vs a 50-digit (mpmath) evaluation of the chain built from the same FP64 cell matrices, \|x_rec − x_ref\| / max(1, \|x_ref\|) ≤ 10⁻⁹, j = 2..18, 4603 frequencies (4001 uniform + dense around the stub pole and f_t), where both are finite | PASS: max 4.4×10⁻¹¹ (4181 cells); finite at 83–100% of frequencies |
 | T3 | I constant along j (\|I_j − I₁\| ≤ 10⁻⁹ max(1, \|I\|) where all three \|x\| ≤ 10); I > 0 on 0.5–25 kHz | PASS: max change 3.8×10⁻¹⁴; min I = 9.8×10⁻¹³ at 19.0038 kHz |
 | T4 | B_j within 0.5% between a 0.1 Hz and a 0.025 Hz grid, up to 4181 cells | PASS: 0.036% |
 | T5 | 6-cycle (0, 0, √(I+1)): linearization of Φ⁶ has eigenvalues μ, 1, 1/μ with μ + 1/μ = 16(1 + I)² + 2, relative error ≤ 10⁻⁹ | PASS: 4.4×10⁻¹⁶ for I from 10⁻¹² to 8×10⁹ |
@@ -339,13 +339,42 @@ grow as e^{γN} (to ~10⁷¹ at 13 cells), where FP64 can't evaluate AD − BC =
 without cancellation. T1 was reformulated as above (normalized matrices, masked
 to bounded entries) and passes.
 
-**T2 still fails with the relative tolerance, and is left as a finding.** The
-recursion is right — the relative error grows smoothly with chain length with no
-breakdown: 2.1×10⁻¹⁴ (8 cells), 7.0×10⁻¹³ (34), 4.3×10⁻¹¹ (144), 2.0×10⁻¹⁰
-(610), 1.2×10⁻⁹ (1597), 3.0×10⁻⁹ (2584), 1.7×10⁻⁹ (4181). That is rounding
-accumulated over thousands of 2×2 products (in the explicit product, the
-recursion, or both), so a fixed 10⁻⁹ holds only up to ~1000 cells; passing it
-over the full range would need a length-dependent tolerance.
+**T2: how it was resolved.** Next, T2 compared the recursion with the explicit
+FP64 product using a relative tolerance, |x_rec − x_prod| / max(1, |x_prod|) ≤
+10⁻⁹. It still failed (3.0×10⁻⁹ at 2584 cells), with the difference growing
+smoothly with length: 2.1×10⁻¹⁴ (8 cells), 4.3×10⁻¹¹ (144), 2.0×10⁻¹⁰ (610),
+1.2×10⁻⁹ (1597). The standard backward-error bound for chained products,
+γ₂ₙ ∏‖M_k‖ with γ_k = ku/(1 − ku), u = 2⁻⁵³, could not decide where that sits:
+each cell has ‖M_k‖ ≈ 1.25, so the bound exceeds 1 beyond ~150 cells and reaches
+10²³⁶ at 4181 cells, ~10²⁴⁸ times the measured error. A 50-digit reference
+(mpmath; 50 and 80 digits agree exactly) decided it by splitting the error into
+its sources:
+
+| Cells | explicit FP64 product: own rounding | FP64 trace recursion: own rounding | FP64 cell error, propagated (any method) |
+|---|---|---|---|
+| 144 | 4.4×10⁻¹¹ | 1.2×10⁻¹² | 2.5×10⁻¹¹ |
+| 610 | 1.9×10⁻¹⁰ | 8.7×10⁻¹² | 1.1×10⁻¹⁰ |
+| 2584 | **3.0×10⁻⁹** | 6.4×10⁻¹¹ | 8.1×10⁻¹⁰ |
+| 4181 | 1.6×10⁻⁹ | 1.4×10⁻¹⁰ | 1.7×10⁻⁹ |
+
+(204 frequencies: 200 uniform + the five where the product-vs-recursion
+difference was largest.) The 3.0×10⁻⁹ is the explicit matrix product's own
+rounding; the scalar recursion's is 20–50× smaller. T2 therefore now tests what
+it is meant to test — the recursion's arithmetic — against the 50-digit chain of
+the same FP64 cells, and passes (4.4×10⁻¹¹ at 4181 cells on the script's 4603
+frequencies; 1.4×10⁻¹⁰ at the five worst-case frequencies above). What no method
+can remove is the FP64 error of the cell matrices themselves — mostly tan(k l_eff)
+near the stub pole — propagated along the chain: 5.8×10⁻¹⁰ at 4181 cells away from
+the pole, and up to ~16 (relative) within ~50 Hz of it already at 13 cells,
+where tan() is ill-conditioned;
+the script reports it alongside T2 without testing it.
+
+A first version of this reformulated T2 passed vacuously: near the stub pole the
+traces overflow, inf − inf gave NaN, and Python's `max()` over a list containing
+NaN returned a finite number, so nothing beyond 21 cells was actually checked.
+It was caught before commit from the per-length output (`nan` from 34 cells on);
+the check now compares only where both values are finite, reports that fraction,
+and fails on any NaN.
 
 **I(f) > 0 everywhere on the grid.** It vanishes only where the cells stop
 scattering: at f_t = c/(2 l_eff) = 19.0038 kHz the stubs are half a wavelength
@@ -372,17 +401,54 @@ frequency (~10⁻⁶ at 0.5 kHz) as Y → 0.
   localization, not critical scaling.
 - **Periodic:** constant, 21.52 kHz at every length.
 
-**Local exponent.** Fitting B ∝ F^(−α) separately in 1 kHz windows (34–4181
-cells):
+**Local exponent and local dimension.** In 1 kHz windows: α from B ∝ F^(−α)
+(34–4181 cells), and the box-counting dimension D₀ of the 4181-cell band set
+(grid-aligned boxes, ε = 1–50 Hz, fit range fixed before the run). D₀ counts as
+converged only if N(ε) agrees within 2% between the 0.1 and 0.025 Hz grids and
+between the 2584- and 4181-cell sets.
 
-| Window | median I | α | | Window | median I | α |
-|---|---|---|---|---|---|---|
-| 1–2 kHz | 5.1×10⁻⁵ | 0.003 | | 13–14 kHz | 7.9×10⁻² | 0.157 |
-| 3–4 kHz | 1.8×10⁻³ | 0.019 | | 15–16 kHz | 2.4×10⁻² | 0.077 |
-| 5–6 kHz | 1.7×10⁻² | 0.060 | | 17–18 kHz | 4.1×10⁻³ | 0.026 |
-| 7–8 kHz | 0.16 | 0.195 | | 19–20 kHz | 4.7×10⁻⁴ | 0.007 |
-| 9–10 kHz | — | pass band vanishes | | 21–22 kHz | 1.4×10⁻² | 0.058 |
-| 11–12 kHz | 0.32 | 0.338 | | 23–24 kHz | 6.1×10⁻² | 0.132 |
+| Window | median I | α | D₀ | D₀ converged? |
+|---|---|---|---|---|
+| 1–2 kHz | 5.1×10⁻⁵ | 0.003 | 0.996 | yes (0.0%) |
+| 3–4 kHz | 1.8×10⁻³ | 0.019 | 0.974 | **no** (5.0%) |
+| 5–6 kHz | 1.7×10⁻² | 0.060 | 0.939 | yes (0.7%) |
+| 7–8 kHz | 0.16 | 0.195 | 0.817 | **no** (3.2%) |
+| 9–10 kHz | — | — | — | pass band vanishes |
+| 11–12 kHz | 0.32 | 0.338 | 0.720 | **no** (11.4%) |
+| 13–14 kHz | 7.9×10⁻² | 0.157 | 0.872 | yes (0.9%) |
+| 15–16 kHz | 2.4×10⁻² | 0.077 | 0.930 | yes (1.1%) |
+| 17–18 kHz | 4.1×10⁻³ | 0.026 | 0.969 | yes (0.5%) |
+| 19–20 kHz | 4.7×10⁻⁴ | 0.007 | 0.981 | yes (0.1%) |
+| 21–22 kHz | 1.4×10⁻² | 0.058 | 0.946 | **no** (2.6%) |
+| 23–24 kHz | 6.1×10⁻² | 0.132 | 0.880 | yes (1.8%) |
+
+D₀ follows the coupling the same way α does: close to 1 where I is small
+(0.996 at 1–2 kHz, 0.981 in the 19–20 kHz window next to the transparency point)
+and lower where I is large. Over the 7 converged windows 1 − D₀ ∝ I^0.45 (rms
+residual 0.18 in ln(1 − D₀)). The largest drops, 0.817 (7–8 kHz) and 0.720
+(11–12 kHz) beside the stub resonance, are **not converged** at 4181 cells: the
+band structure there is still changing at 1–50 Hz scales, so those two values
+indicate a trend, not measured dimensions. The lowest converged values are
+0.872 (13–14 kHz) and 0.880 (23–24 kHz).
+
+**Global box counting, and why it can't stand alone.** Over all of 0.5–25 kHz
+(ε = 1–100 Hz): Fibonacci 4181 cells D₀ = 0.936 (grids agree to 0.71%, 2584 vs
+4181 cells to 0.13% — converged); periodic 0.999 (converged); random order, same
+L/S counts, 610 cells, mean of 10 shuffles: 0.718, but the grids disagree by
+7.3% — not converged — and its local slope jumps between decades (0.95, 0.74,
+0.80, 0.94, 0.83 from 0.1 Hz to 25 kHz), so there is no scaling range. Taken at
+face value, finite-scale box counting would rank the disordered tube as "more
+fractal" than the quasicrystal: a set of narrow localized bands looks
+fragmented at intermediate scales whether or not it has any critical structure.
+Box counting also says nothing about the infinite-chain limit: a set's box
+dimension is set by its least-thinned part, and near the transparency point
+(I → 0) the local D₀ approaches 1, so the infinite spectrum's D₀ over the whole
+band is plausibly 1 even if its measure is 0. The 0.936 is a frequency-weighted
+effective value at 1–100 Hz scales, like the aggregate α. What separates the
+Fibonacci tube from the disordered one in this analysis is the behaviour of the
+pass-band measure with length — B_j ∝ F_j^(−α) as a clean power law (rms
+residual 0.008) versus a faster collapse that fits neither a power law nor an
+exponential — together with I(f) > 0.
 
 The exponent is set by the local coupling: across the windows α ∝ I^0.55 (rms
 residual 0.10 in ln α), with α/√I between 0.33 and 0.60. It goes to 0 as I → 0
